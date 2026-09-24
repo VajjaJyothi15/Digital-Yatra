@@ -723,3 +723,63 @@ a {
   justify-content: center;
   gap: 4px;
 }
+
+/* Modal Keyframes & Responsive Media Queries */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scaleUp {
+  animation: scaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Comprehensive Device Responsiveness (Desktops, Tablets & Mobiles) */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 12px 16px;
+  }
+  
+  .history-hero {
+    padding: 24px 16px;
+    border-radius: 20px;
+  }
+
+  .history-hero-title {
+    font-size: 1.75rem;
+  }
+
+  .places-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .place-card-actions {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .state-select-card {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .history-hero-title {
+    font-size: 1.4rem;
+  }
+
+  .place-card-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
