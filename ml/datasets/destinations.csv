@@ -1,0 +1,10 @@
+id,name,city,category,entry_fee,rating,trust_status
+1,Charminar & Old City,Hyderabad,History,25.0,4.6,VERIFIED
+2,Golconda Fort,Hyderabad,History,50.0,4.5,VERIFIED
+3,Amer Fort,Jaipur,History,100.0,4.7,VERIFIED
+4,Hawa Mahal,Jaipur,Culture,50.0,4.4,VERIFIED
+5,Dashashwamedh Ghat,Varanasi,Spiritual,0.0,4.8,VERIFIED
+6,Kashi Vishwanath Temple,Varanasi,Spiritual,0.0,4.7,VERIFIED
+7,Baga Beach,Goa,Adventure,0.0,4.3,USER-REPORTED
+8,Qutub Minar,Delhi,History,40.0,4.5,VERIFIED
+9,Gateway of India,Mumbai,History,0.0,4.6,VERIFIED

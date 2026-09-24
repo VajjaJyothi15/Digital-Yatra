@@ -1,0 +1,5 @@
+{
+  "model": "RandomForestRegressor",
+  "r2_score": 0.9995,
+  "n_samples": 500
+}

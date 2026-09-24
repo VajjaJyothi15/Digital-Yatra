@@ -1,0 +1,95 @@
+/* Safety Mode Emergency Interface Styles */
+
+.safety-container {
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 0 24px;
+}
+
+.safety-hero {
+  background: linear-gradient(135deg, #7F1D1D 0%, #991B1B 40%, #B91C1C 100%);
+  color: white;
+  padding: 40px 28px;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 40px rgba(185, 28, 28, 0.3);
+  text-align: center;
+  margin-bottom: 32px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.sos-button-wrapper {
+  margin: 28px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.sos-big-btn {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  color: white;
+  border: 6px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 0 12px rgba(239, 68, 68, 0.3), 0 15px 35px rgba(0, 0, 0, 0.4);
+  font-size: 2.2rem;
+  font-weight: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: var(--font-heading);
+}
+
+.sos-big-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 0 18px rgba(239, 68, 68, 0.4), 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.emergency-numbers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.emergency-num-card {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 18px;
+  text-align: center;
+  border: 1px solid #FEE2E2;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.emergency-num-card:hover {
+  border-color: var(--danger);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.safety-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+@media (max-width: 700px) {
+  .safety-actions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.safety-card {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  border: 1.5px solid #E2E8F0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}

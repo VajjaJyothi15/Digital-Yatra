@@ -1,0 +1,24 @@
+services:
+  # 1. Backend Web Service
+  - type: web
+    name: digital-yatra-backend
+    env: python
+    buildCommand: "cd backend && pip install -r requirements.txt"
+    startCommand: "cd backend && gunicorn \"app:create_app()\""
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: FLASK_ENV
+        value: production
+
+  # 2. Frontend Static Site
+  - type: static
+    name: digital-yatra-frontend
+    env: static
+    buildCommand: "cd frontend && npm install && npm run build"
+    staticPublishPath: ./frontend/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

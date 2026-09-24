@@ -1,0 +1,7 @@
+transport_type,origin,destination,min_fare,max_fare,est_time_mins
+Auto,Charminar,Golconda Fort,150.0,220.0,30
+Taxi,Charminar,Secunderabad Station,250.0,380.0,40
+Auto,Jaipur Railway Station,Hawa Mahal,100.0,160.0,20
+Taxi,Jaipur Airport,Amer Fort,450.0,650.0,45
+Auto,Varanasi Junction,Dashashwamedh Ghat,80.0,130.0,25
+Taxi,Goa Airport (Dabolim),Baga Beach,900.0,1300.0,60
