@@ -25,8 +25,12 @@ def create_schema_tables(conn):
             with open(schema_path, 'r', encoding='utf-8') as f:
                 conn.executescript(f.read())
             conn.commit()
+
+        # Import and run idempotent seed function if tables are empty
+        from database.seed import seed_data_if_empty
+        seed_data_if_empty(conn)
     except Exception as e:
-        print(f"[DB] Error executing schema.sql: {e}")
+        print(f"[DB] Error executing schema.sql / seeding: {e}")
 
 def create_chat_tables(conn):
     try:

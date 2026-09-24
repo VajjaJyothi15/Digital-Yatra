@@ -28,12 +28,13 @@ export const getLiveLocation = (onSuccess, onError, onStatusUpdate) => {
 
   if (!navigator.geolocation) {
     const err = new Error("Geolocation API not supported by browser");
+    err.code = 0;
     if (onStatusUpdate) onStatusUpdate("⚠️ Browser does not support geolocation. Search location or click map.");
     if (onError) onError(err);
     return;
   }
 
-  // Request native browser location with sufficient timeout for device/browser permission
+  // Request native browser location with 15s timeout
   navigator.geolocation.getCurrentPosition(
     (position) => {
       const loc = {
@@ -52,11 +53,11 @@ export const getLiveLocation = (onSuccess, onError, onStatusUpdate) => {
       console.warn("Native Geolocation failed/denied:", err.message, "code:", err.code);
       let userMsg = "⚠️ Present location unavailable. Search destination or click map to set pin.";
       if (err.code === 1) {
-        userMsg = "⚠️ Location permission denied by browser. Please allow location access or search location below.";
+        userMsg = "Location permission is turned off. You can enable it in your browser site settings, or continue using the fallback location.";
       } else if (err.code === 2) {
-        userMsg = "⚠️ Location position unavailable on device. Search location below.";
+        userMsg = "Your device could not determine your location. Please check your device location services.";
       } else if (err.code === 3) {
-        userMsg = "⚠️ Location request timed out. Retrying or search destination below.";
+        userMsg = "Could not get your location within 15 seconds. Please try again or continue with the fallback location.";
       }
 
       if (onStatusUpdate) onStatusUpdate(userMsg);
@@ -67,7 +68,7 @@ export const getLiveLocation = (onSuccess, onError, onStatusUpdate) => {
         if (onSuccess) onSuccess(apFallback);
       }
     },
-    { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
   );
 };
 

@@ -32,8 +32,16 @@ export default function LocationPermissionModal({ user, userLocation, onLocation
       },
       (err) => {
         setRequesting(false);
-        console.warn('GPS prompt error:', err.message);
-        setErrorMsg('Browser GPS permission was denied or timed out. Using current fallback coordinates.');
+        console.warn('GPS prompt notice:', err.message, 'code:', err.code);
+        if (err.code === 1) {
+          setErrorMsg('Location permission is turned off. You can enable it in your browser site settings, or continue using the fallback location.');
+        } else if (err.code === 2) {
+          setErrorMsg('Your device could not determine your location. Please check your device location services.');
+        } else if (err.code === 3) {
+          setErrorMsg('Could not get your location within 15 seconds. Please try again or continue with the fallback location.');
+        } else {
+          setErrorMsg('Location access unavailable. Continuing with fallback location.');
+        }
         sessionStorage.setItem('dy_gps_prompt_responded', 'true');
       },
       (status) => setStatusMsg(status)
@@ -80,7 +88,7 @@ export default function LocationPermissionModal({ user, userLocation, onLocation
         </p>
 
         {/* Status / Error Notifications */}
-        {statusMsg && (
+        {statusMsg && !errorMsg && (
           <div className="p-3 bg-blue-950/60 border border-blue-800/80 rounded-2xl text-xs text-blue-300 font-bold flex items-center gap-2">
             <RefreshCw className={`w-4 h-4 text-blue-400 ${requesting ? 'animate-spin' : ''}`} />
             <span>{statusMsg}</span>
@@ -88,8 +96,9 @@ export default function LocationPermissionModal({ user, userLocation, onLocation
         )}
 
         {errorMsg && (
-          <div className="p-3 bg-red-950/60 border border-red-800/80 rounded-2xl text-xs text-red-300 font-bold">
-            {errorMsg}
+          <div className="p-3.5 bg-amber-950/40 border border-amber-800/60 rounded-2xl text-xs text-amber-200 font-semibold leading-normal flex items-start gap-2">
+            <Shield className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <span>{errorMsg}</span>
           </div>
         )}
 
@@ -114,14 +123,14 @@ export default function LocationPermissionModal({ user, userLocation, onLocation
             className="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs sm:text-sm font-black rounded-2xl shadow-xl transition flex items-center justify-center gap-2 disabled:opacity-50"
           >
             <Navigation className="w-4 h-4 fill-white" />
-            {requesting ? 'Connecting Live Device GPS...' : 'ALLOW LIVE GPS LOCATION 🎯'}
+            {requesting ? 'Connecting Live Device GPS...' : errorMsg ? 'TRY AGAIN 🔄' : 'ALLOW LIVE GPS LOCATION 🎯'}
           </button>
 
           <button
             onClick={handleSkip}
             className="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-2xl transition"
           >
-            Skip / Choose Location Manually
+            Continue with Fallback Location
           </button>
         </div>
 

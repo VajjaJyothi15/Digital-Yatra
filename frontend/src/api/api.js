@@ -1,6 +1,14 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://digital-yatra-1.onrender.com/api';
+const getBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    return 'http://127.0.0.1:5000/api';
+  }
+  return 'https://digital-yatra-1.onrender.com/api';
+};
+
+const API_BASE_URL = getBaseUrl();
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
