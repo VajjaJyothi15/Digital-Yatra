@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000/api';
-
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://digital-yatra-1.onrender.com/api';
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -231,7 +230,7 @@ export const getAdminGuides = async () => {
 };
 
 export const verifyGuideByAdmin = async (guideId, verifiedOrStatus) => {
-  const payload = typeof verifiedOrStatus === 'boolean' 
+  const payload = typeof verifiedOrStatus === 'boolean'
     ? { verified: verifiedOrStatus, status: verifiedOrStatus ? 'VERIFIED' : 'REJECTED' }
     : { status: verifiedOrStatus };
   const response = await api.put(`/admin/guides/${guideId}/verify`, payload);
