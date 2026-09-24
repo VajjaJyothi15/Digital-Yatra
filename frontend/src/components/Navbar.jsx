@@ -71,10 +71,8 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
         email: editEmail || user?.email,
         name: editName,
         phone: editPhone,
-        city: editCity,
+        city: user?.city || 'Goa',
         designation: editDesignation,
-        interests: editInterests,
-        budget_preference: editBudget,
         languages: editLanguages,
         specialization: editSpecialization,
         price_per_day: editPrice
@@ -93,7 +91,8 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
         setSaveError(res.message || 'Failed to update profile.');
       }
     } catch (err) {
-      setSaveError(err.response?.data?.message || 'Error updating profile.');
+      console.error('Profile update error:', err);
+      setSaveError(err.response?.data?.message || err.message || 'Error updating profile.');
     } finally {
       setSaving(false);
     }
