@@ -17,6 +17,7 @@ export default function Reviews() {
 
   // Review Form State
   const [selectedDestination, setSelectedDestination] = useState(location.state?.destinationName || 'Goa');
+  const [customDestination, setCustomDestination] = useState('');
   const [destinationRating, setDestinationRating] = useState(5);
   const [hoverDestRating, setHoverDestRating] = useState(0);
 
@@ -25,6 +26,18 @@ export default function Reviews() {
   const [hoverGuideRating, setHoverGuideRating] = useState(0);
 
   const [comments, setComments] = useState('');
+
+  // Comprehensive List of Major Indian Tourist Destinations & Cities
+  const POPULAR_DESTINATIONS = [
+    "Goa", "Jaipur", "Varanasi", "Agra", "Tirupati", "Visakhapatnam",
+    "Kerala Backwaters", "Udaipur", "Delhi", "Mumbai", "Bengaluru",
+    "Chennai", "Kolkata", "Hyderabad", "Shimla", "Manali", "Rishikesh",
+    "Ooty", "Darjeeling", "Amritsar", "Mysore", "Munnar", "Kochi",
+    "Pune", "Ahmedabad", "Jodhpur", "Ladakh / Leh", "Kanyakumari",
+    "Pondicherry", "Srinagar", "Shillong", "Coorg", "Hampi", "Ayodhya",
+    "Puri", "Mathura / Vrindavan", "Jaisalmer", "Nainital", "Rameswaram",
+    "Vijayawada", "Guwahati", "Madurai", "Kodaikanal", "Chikmagalur"
+  ];
 
   useEffect(() => {
     fetchInitialData();
@@ -56,11 +69,20 @@ export default function Reviews() {
 
     const userStr = localStorage.getItem('user');
     if (!userStr) {
-      alert('Please login as a Tourist to submit a review.');
-      navigate('/login');
+      setErrorMessage('Please login to post your review.');
+      setTimeout(() => navigate('/login', { state: { from: '/reviews' } }), 1200);
       return;
     }
     const user = JSON.parse(userStr);
+
+    const finalDestinationName = selectedDestination === 'OTHER'
+      ? customDestination.trim()
+      : selectedDestination;
+
+    if (!finalDestinationName) {
+      setErrorMessage('Please specify or select a destination/city name.');
+      return;
+    }
 
     if (!comments.trim()) {
       setErrorMessage('Please enter comments describing your trip or guide experience.');
@@ -71,7 +93,7 @@ export default function Reviews() {
     try {
       const payload = {
         tourist_id: user.id,
-        destination_name: selectedDestination,
+        destination_name: finalDestinationName,
         destination_rating: destinationRating,
         guide_id: selectedGuideId ? Number(selectedGuideId) : null,
         guide_rating: guideRating,
@@ -82,6 +104,7 @@ export default function Reviews() {
       if (res.success) {
         setSuccessMessage('🎉 Review submitted successfully! Ratings updated across Guide & Admin dashboards.');
         setComments('');
+        setCustomDestination('');
         setTimeout(() => setSuccessMessage(''), 5000);
         
         // Refresh reviews list
@@ -99,6 +122,14 @@ export default function Reviews() {
 
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
+
+  // Build unique merged destination list
+  const mergedDestinations = Array.from(
+    new Set([
+      ...POPULAR_DESTINATIONS,
+      ...destinations.map((d) => d.name)
+    ])
+  ).sort();
 
   return (
     <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8">
@@ -127,9 +158,27 @@ export default function Reviews() {
               <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-amber-500" /> Write a Review
               </h2>
-              <p className="text-xs text-slate-500 mt-1">
-                {user ? `Logged in as: ${user.name} (${user.email})` : 'Please login to post your review.'}
-              </p>
+              {user ? (
+                <p className="text-xs text-slate-500 mt-1">
+                  Logged in as: <strong className="text-slate-900">{user.name}</strong> ({user.email})
+                </p>
+              ) : (
+                <div className="mt-3 p-3 bg-amber-50 rounded-2xl border border-amber-200/80 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span className="text-xs font-extrabold text-amber-900">
+                      Please login to post your review.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/login', { state: { from: '/reviews' } })}
+                    className="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs rounded-xl shadow transition shrink-0"
+                  >
+                    Login Now
+                  </button>
+                </div>
+              )}
             </div>
 
             {successMessage && (
@@ -148,7 +197,9 @@ export default function Reviews() {
               
               {/* Destination Selector */}
               <div>
-                <label className="block text-xs font-extrabold text-slate-700 mb-1">Select Destination / City</label>
+                <label className="block text-xs font-extrabold text-slate-700 mb-1">
+                  Select Destination / City
+                </label>
                 <div className="relative">
                   <select
                     value={selectedDestination}
@@ -156,21 +207,32 @@ export default function Reviews() {
                     className="w-full px-4 py-3 rounded-xl border border-slate-300 text-xs sm:text-sm font-semibold focus:ring-2 focus:ring-amber-500 bg-white"
                     required
                   >
-                    <option value="Goa">Goa (Beach Capital)</option>
-                    <option value="Jaipur">Jaipur (Pink City)</option>
-                    <option value="Varanasi">Varanasi (Spiritual Capital)</option>
-                    <option value="Agra">Agra (Taj Mahal)</option>
-                    <option value="Tirupati">Tirupati (Temple Hub)</option>
-                    <option value="Visakhapatnam">Visakhapatnam (Coastal City)</option>
-                    <option value="Kerala Backwaters">Kerala Backwaters</option>
-                    <option value="Udaipur">Udaipur (City of Lakes)</option>
-                    {destinations.map((d) => (
-                      <option key={d.id} value={d.name}>{d.name} ({d.state})</option>
+                    {mergedDestinations.map((name) => (
+                      <option key={name} value={name}>{name}</option>
                     ))}
+                    <option value="OTHER">➕ Add Custom Destination / City...</option>
                   </select>
                   <MapPin className="w-4 h-4 text-slate-400 absolute right-4 top-3.5 pointer-events-none" />
                 </div>
+
+                {/* Custom Destination / City Text Input */}
+                {selectedDestination === 'OTHER' && (
+                  <div className="mt-2.5 space-y-1">
+                    <label className="block text-[11px] font-extrabold text-amber-800">
+                      Type Custom Destination / City Name:
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={customDestination}
+                      onChange={(e) => setCustomDestination(e.target.value)}
+                      placeholder="e.g. Kedarnath, Alleppey, Chikmagalur, Kodaikanal..."
+                      className="w-full px-4 py-2.5 rounded-xl border border-amber-300 text-xs font-semibold focus:ring-2 focus:ring-amber-500 bg-amber-50/50 text-slate-900"
+                    />
+                  </div>
+                )}
               </div>
+
 
               {/* Destination Star Rating */}
               <div>
