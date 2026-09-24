@@ -3,7 +3,7 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { getLocalGuides, getDestinations, createGuideBooking } from '../api/api';
 import { 
   UserCheck, Star, MapPin, Calendar, Clock, Users, ShieldCheck, 
-  Search, CheckCircle2, AlertCircle, X, Compass, Filter, DollarSign 
+  Search, CheckCircle2, AlertCircle, X, Compass, Filter, DollarSign, Mail 
 } from 'lucide-react';
 
 export default function BookGuide() {
@@ -246,17 +246,37 @@ export default function BookGuide() {
                     </div>
                   </div>
 
-                  {/* Verification Badge */}
-                  <div className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-50 text-green-700 rounded-lg text-xs font-semibold mb-4">
-                    <ShieldCheck className="w-3.5 h-3.5 text-green-600" /> Verified Tourism Guide
-                  </div>
+                  {/* Dynamic Verification Badge */}
+                  {guide.verified || guide.verification_status === 'VERIFIED' ? (
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-extrabold mb-4 shadow-xs">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> ✓ Verified Tourism Guide
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-xl text-xs font-extrabold mb-4 shadow-xs">
+                      <Clock className="w-3.5 h-3.5 text-amber-600" /> ⏳ Verification Pending (Admin Review)
+                    </div>
+                  )}
 
-                  {/* Guide Info List */}
-                  <div className="text-xs text-slate-600 space-y-2 mb-6 bg-slate-50 p-3.5 rounded-xl border border-slate-100">
-                    <p><strong>Languages:</strong> {guide.languages}</p>
-                    <p><strong>Specialization:</strong> {guide.specialization}</p>
-                    <p><strong>Experience:</strong> {guide.experience}</p>
-                    {guide.description && <p className="text-slate-500 italic mt-1 line-clamp-2">"{guide.description}"</p>}
+                  {/* Guide Details List */}
+                  <div className="text-xs text-slate-700 space-y-2 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+                    <p><strong>🗣️ Spoken Languages:</strong> {guide.languages || 'English, Hindi'}</p>
+                    <p><strong>🎯 Specialization:</strong> {guide.specialization || 'Heritage & Culture'}</p>
+                    <p><strong>⭐ Experience:</strong> {guide.experience || (guide.experience_years ? `${guide.experience_years} Years` : '3 Years')}</p>
+                    
+                    {/* Contact Details */}
+                    <div className="pt-2 border-t border-slate-200/60 mt-2 space-y-1">
+                      <span className="font-extrabold text-[10px] text-slate-400 uppercase tracking-wider block">Guide Contact Info:</span>
+                      <p className="flex items-center gap-1.5 text-slate-800 font-semibold truncate">
+                        <Mail className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                        <span className="truncate">{guide.email || 'Contact via Digital Yatra'}</span>
+                      </p>
+                    </div>
+
+                    {(guide.description || guide.bio) && (
+                      <p className="text-slate-500 italic mt-2 text-[11px] line-clamp-2 pt-2 border-t border-slate-200/60">
+                        "{guide.description || guide.bio}"
+                      </p>
+                    )}
                   </div>
                 </div>
 

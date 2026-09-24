@@ -42,6 +42,8 @@ def update_report(report_id):
         "result": result
     })
 
+from services.local_guide_service import format_guide_dict
+
 @admin_bp.route('/admin/guides', methods=['GET'])
 def get_admin_guides():
     db = get_db()
@@ -49,7 +51,7 @@ def get_admin_guides():
     return jsonify({
         "success": True,
         "count": len(rows),
-        "guides": [dict(r) for r in rows]
+        "guides": [format_guide_dict(r) for r in rows]
     })
 
 @admin_bp.route('/admin/guides/<int:guide_id>/verify', methods=['PUT', 'POST'])

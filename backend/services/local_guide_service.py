@@ -9,6 +9,8 @@ def format_guide_dict(guide_row):
     g['price'] = g.get('price_per_day', 800)
     g['price_per_day'] = g.get('price_per_day', 800)
     g['photo'] = g.get('profile_photo') or ''
+    g['experience_years'] = g.get('experience_years') if g.get('experience_years') is not None else 3
+    g['experience'] = g.get('experience') or f"{g['experience_years']} Years"
     g['verified'] = True if g.get('verification_status') == 'VERIFIED' else False
     return g
 
@@ -153,7 +155,7 @@ def get_guide_dashboard_data(user_id):
             cursor = db.cursor()
             cursor.execute(
                 """INSERT INTO guides (user_id, name, city, languages, specialization, experience_years, price_per_day, bio, verification_status, availability_status)
-                   VALUES (?, ?, 'Goa', 'English, Hindi', 'Heritage & Culture', 3, 800.0, 'Certified local tourist guide.', 'VERIFIED', 'AVAILABLE')""",
+                   VALUES (?, ?, 'Goa', 'English, Hindi', 'Heritage & Culture', 3, 800.0, 'Certified local tourist guide.', 'PENDING', 'AVAILABLE')""",
                 (u['id'], u['name'])
             )
             db.commit()
@@ -175,8 +177,8 @@ def get_guide_dashboard_data(user_id):
             "price": 800.0,
             "rating": 4.8,
             "availability_status": "AVAILABLE",
-            "verification_status": "VERIFIED",
-            "verified": True,
+            "verification_status": "PENDING",
+            "verified": False,
             "bio": "Certified local tourist guide."
         }
     else:
@@ -236,7 +238,7 @@ def update_guide_profile_data(guide_id, data):
         u_name = data.get('name') or (u['name'] if u else 'Local Guide')
         cursor.execute(
             """INSERT INTO guides (user_id, name, city, languages, specialization, experience_years, price_per_day, bio, profile_photo, availability_status, verification_status)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'AVAILABLE', 'VERIFIED')""",
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'AVAILABLE', 'PENDING')""",
             (u_id, u_name, data.get('city', 'Goa'), data.get('languages', 'English, Hindi'), data.get('specialization', 'Heritage & Culture'),
              int(data.get('experience_years') or 3), float(data.get('price_per_day') or 800.0), data.get('bio', 'Certified local guide.'),
              data.get('profile_photo', ''))
