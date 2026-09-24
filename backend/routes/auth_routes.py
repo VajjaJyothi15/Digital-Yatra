@@ -219,3 +219,52 @@ def get_current_user():
         "success": True,
         "user": dict(user_row)
     })
+
+@auth_bp.route('/profile/update', methods=['POST', 'PUT'])
+def update_profile():
+    data = request.get_json() or {}
+    user_id = data.get('id')
+    email = data.get('email', '').strip()
+    name = data.get('name', '').strip()
+    interests = data.get('interests', '')
+    budget_preference = data.get('budget_preference', 'Medium')
+
+    if not name:
+        return jsonify({"success": False, "message": "Full name cannot be empty."}), 400
+
+    db = get_db()
+    if user_id:
+        db.execute(
+            "UPDATE users SET name = ?, interests = ?, budget_preference = ? WHERE id = ?",
+            (name, interests, budget_preference, user_id)
+        )
+    elif email:
+        db.execute(
+            "UPDATE users SET name = ?, interests = ?, budget_preference = ? WHERE email = ?",
+            (name, interests, budget_preference, email)
+        )
+    else:
+        return jsonify({"success": False, "message": "User identification required."}), 400
+
+    db.commit()
+
+    # Retrieve updated record
+    if user_id:
+        user_row = db.execute("SELECT id, name, email, role, interests, budget_preference FROM users WHERE id = ?", (user_id,)).fetchone()
+    else:
+        user_row = db.execute("SELECT id, name, email, role, interests, budget_preference FROM users WHERE email = ?", (email,)).fetchone()
+
+    updated_user = dict(user_row) if user_row else {
+        "id": user_id,
+        "name": name,
+        "email": email,
+        "interests": interests,
+        "budget_preference": budget_preference
+    }
+
+    return jsonify({
+        "success": True,
+        "message": "Profile updated successfully!",
+        "user": updated_user
+    })
+

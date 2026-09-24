@@ -42,6 +42,12 @@ export const loginWithGoogle = async (payload) => {
   return response.data;
 };
 
+export const updateUserProfile = async (payload) => {
+  const response = await api.post('/auth/profile/update', payload);
+  return response.data;
+};
+
+
 // Destination APIs (India-wide)
 export const getDestinations = async (params = {}) => {
   const response = await api.get('/destinations', { params });

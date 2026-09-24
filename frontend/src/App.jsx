@@ -51,6 +51,13 @@ function App() {
     sessionStorage.removeItem('dy_gps_prompt_responded');
   };
 
+  const handleUpdateUser = (updatedData) => {
+    const newUserData = { ...user, ...updatedData };
+    setUser(newUserData);
+    localStorage.setItem('user', JSON.stringify(newUserData));
+    localStorage.setItem('dy_user', JSON.stringify(newUserData));
+  };
+
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('user');
@@ -70,7 +77,8 @@ function App() {
             onLocationUpdate={handleLocationUpdate} 
           />
         )}
-        <Navbar user={user} userLocation={userLocation} onLogout={handleLogout} />
+        <Navbar user={user} userLocation={userLocation} onLogout={handleLogout} onUpdateUser={handleUpdateUser} />
+
         <main className="main-content">
           <Routes>
             {/* ROLE BASED DASHBOARD REDIRECTION */}
