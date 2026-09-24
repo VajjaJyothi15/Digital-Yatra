@@ -16,6 +16,16 @@ def close_db(e=None):
     if db is not None:
         db.close()
 
+def create_schema_tables(conn):
+    try:
+        schema_path = os.path.join(os.path.dirname(__file__), 'schema.sql')
+        if os.path.exists(schema_path):
+            with open(schema_path, 'r', encoding='utf-8') as f:
+                conn.executescript(f.read())
+            conn.commit()
+    except Exception as e:
+        print(f"[DB] Error executing schema.sql: {e}")
+
 def create_chat_tables(conn):
     try:
         cursor = conn.cursor()
@@ -49,11 +59,14 @@ def init_db(app):
     app.teardown_appcontext(close_db)
     with app.app_context():
         db = get_db()
+        create_schema_tables(db)
         create_chat_tables(db)
 
 def get_db_connection():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
+    create_schema_tables(conn)
     create_chat_tables(conn)
     return conn
+

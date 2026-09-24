@@ -1,17 +1,6 @@
 -- Schema for Digital Yatra Smart Tourist Companion (SQLite)
 
-DROP TABLE IF EXISTS feedback;
-DROP TABLE IF EXISTS reports;
-DROP TABLE IF EXISTS itinerary;
-DROP TABLE IF EXISTS trips;
-DROP TABLE IF EXISTS guide_bookings;
-DROP TABLE IF EXISTS guides;
-DROP TABLE IF EXISTS services;
-DROP TABLE IF EXISTS destinations;
-DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS fares;
-
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
@@ -22,7 +11,7 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE guides (
+CREATE TABLE IF NOT EXISTS guides (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER UNIQUE NOT NULL,
     name TEXT NOT NULL,
@@ -40,7 +29,7 @@ CREATE TABLE guides (
     FOREIGN KEY(user_id) REFERENCES users(id)
 );
 
-CREATE TABLE guide_bookings (
+CREATE TABLE IF NOT EXISTS guide_bookings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     booking_code TEXT UNIQUE NOT NULL,
     tourist_id INTEGER NOT NULL,
@@ -57,7 +46,7 @@ CREATE TABLE guide_bookings (
     FOREIGN KEY(guide_id) REFERENCES guides(id)
 );
 
-CREATE TABLE destinations (
+CREATE TABLE IF NOT EXISTS destinations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     city TEXT NOT NULL,
@@ -74,7 +63,7 @@ CREATE TABLE destinations (
     popular INTEGER DEFAULT 1
 );
 
-CREATE TABLE services (
+CREATE TABLE IF NOT EXISTS services (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     category TEXT NOT NULL, -- Restroom, Water, Food, Hospital, Police, Transport, Stay, Attraction
@@ -88,7 +77,7 @@ CREATE TABLE services (
     last_updated TEXT DEFAULT CURRENT_DATE
 );
 
-CREATE TABLE trips (
+CREATE TABLE IF NOT EXISTS trips (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     destination TEXT NOT NULL,
@@ -101,7 +90,7 @@ CREATE TABLE trips (
     FOREIGN KEY(user_id) REFERENCES users(id)
 );
 
-CREATE TABLE itinerary (
+CREATE TABLE IF NOT EXISTS itinerary (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     trip_id INTEGER NOT NULL,
     day_number INTEGER NOT NULL,
@@ -115,7 +104,7 @@ CREATE TABLE itinerary (
     FOREIGN KEY(trip_id) REFERENCES trips(id)
 );
 
-CREATE TABLE reports (
+CREATE TABLE IF NOT EXISTS reports (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
     category TEXT NOT NULL, -- Sanitation, Transport, Overcharging, Safety, Road / Infrastructure, Food / Water, Other
@@ -128,7 +117,7 @@ CREATE TABLE reports (
     FOREIGN KEY(user_id) REFERENCES users(id)
 );
 
-CREATE TABLE feedback (
+CREATE TABLE IF NOT EXISTS feedback (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     service_id INTEGER NOT NULL,
@@ -139,7 +128,7 @@ CREATE TABLE feedback (
     FOREIGN KEY(service_id) REFERENCES services(id)
 );
 
-CREATE TABLE fares (
+CREATE TABLE IF NOT EXISTS fares (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     transport_type TEXT NOT NULL, -- Taxi, Auto, Bus, Metro
     origin TEXT NOT NULL,
@@ -148,3 +137,4 @@ CREATE TABLE fares (
     max_fare REAL NOT NULL,
     est_time_mins INTEGER DEFAULT 20
 );
+
