@@ -3,14 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { getGuideDashboard, updateBookingStatus, updateGuideProfile, updateGuideAvailability } from '../api/api';
 import { 
   UserCheck, Calendar, DollarSign, CheckCircle2, Clock, XCircle, 
-  Settings, Award, ShieldCheck, MapPin, AlertCircle, RefreshCw, Globe, Sparkles, Edit3, Save, Camera, Check 
+  Settings, Award, ShieldCheck, MapPin, AlertCircle, RefreshCw, Globe, Sparkles, Edit3, Save, Camera, Check, Filter, User, Mail, Shield, CheckCircle, Navigation
 } from 'lucide-react';
 
 export default function GuideDashboard() {
   const navigate = useNavigate();
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('bookings'); // bookings or profile or edit
+  const [activeTab, setActiveTab] = useState('bookings'); // 'bookings' or 'profile' or 'edit'
+  const [bookingFilter, setBookingFilter] = useState('ALL'); // ALL, PENDING, CONFIRMED, COMPLETED, CANCELLED
   const [actionLoading, setActionLoading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState('');
   const [saveError, setSaveError] = useState('');
@@ -153,12 +154,22 @@ export default function GuideDashboard() {
   const spokenLanguagesList = guide?.languages ? guide.languages.split(',').map(s => s.trim()).filter(Boolean) : ['English', 'Hindi'];
   const specializationsList = guide?.specialization ? guide.specialization.split(',').map(s => s.trim()).filter(Boolean) : ['Heritage & Culture'];
 
+  // Filtered Bookings
+  const filteredBookings = bookings.filter(b => {
+    if (bookingFilter === 'ALL') return true;
+    if (bookingFilter === 'PENDING') return b.status === 'PENDING';
+    if (bookingFilter === 'CONFIRMED') return b.status === 'CONFIRMED';
+    if (bookingFilter === 'COMPLETED') return b.status === 'COMPLETED';
+    if (bookingFilter === 'CANCELLED') return b.status === 'REJECTED' || b.status === 'CANCELLED';
+    return true;
+  });
+
   return (
     <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
         
         {/* Header Bar */}
-        <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 rounded-3xl p-8 text-white shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border border-slate-800">
           <div className="flex items-center gap-5">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center font-extrabold text-2xl shadow-lg border-2 border-amber-300 shrink-0">
               {guide?.name ? guide.name.charAt(0) : 'G'}
@@ -171,28 +182,32 @@ export default function GuideDashboard() {
                 }`}>
                   {guide?.verified ? '✓ VERIFIED GUIDE' : 'PENDING VERIFICATION'}
                 </span>
-                <span className={`text-[11px] font-extrabold px-3 py-1 rounded-full cursor-pointer ${
-                  guide?.availability_status === 'AVAILABLE' ? 'bg-green-500 text-white' : 'bg-slate-700 text-slate-300'
-                }`} onClick={() => handleToggleAvailability(guide?.availability_status === 'AVAILABLE' ? 'UNAVAILABLE' : 'AVAILABLE')}>
-                  ● {guide?.availability_status || 'AVAILABLE'}
-                </span>
+                <button 
+                  onClick={() => handleToggleAvailability(guide?.availability_status === 'AVAILABLE' ? 'UNAVAILABLE' : 'AVAILABLE')}
+                  className={`text-[11px] font-extrabold px-3 py-1 rounded-full transition flex items-center gap-1.5 ${
+                    guide?.availability_status === 'AVAILABLE' ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${guide?.availability_status === 'AVAILABLE' ? 'bg-white animate-pulse' : 'bg-slate-400'}`}></span>
+                  {guide?.availability_status || 'AVAILABLE'}
+                </button>
               </div>
-              <p className="text-slate-300 text-xs sm:text-sm flex items-center gap-2 font-medium">
+              <p className="text-slate-300 text-xs sm:text-sm flex items-center gap-2 font-medium mt-1">
                 <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" /> Served City: <strong className="text-white">{guide?.city || 'Goa'}</strong> • Daily Rate: <strong className="text-amber-400">₹{guide?.price}/day</strong>
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
             <button
               onClick={() => setActiveTab(activeTab === 'edit' ? 'profile' : 'edit')}
-              className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-xl text-xs flex items-center gap-2 transition shadow-lg"
+              className="flex-1 sm:flex-initial px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-lg"
             >
               <Edit3 className="w-4 h-4" /> {activeTab === 'edit' ? 'View Profile' : 'Edit Profile'}
             </button>
             <button
               onClick={fetchDashboard}
-              className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold backdrop-blur-md flex items-center gap-2 transition"
+              className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold backdrop-blur-md flex items-center justify-center gap-2 transition border border-white/10"
             >
               <RefreshCw className="w-3.5 h-3.5" /> Refresh
             </button>
@@ -201,7 +216,7 @@ export default function GuideDashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition">
             <div className="flex items-center justify-between text-slate-500 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider">Total Bookings</span>
               <Calendar className="w-5 h-5 text-blue-600" />
@@ -210,7 +225,7 @@ export default function GuideDashboard() {
             <p className="text-xs text-slate-400 mt-1">Tourist requests received</p>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition">
             <div className="flex items-center justify-between text-slate-500 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider">Pending Requests</span>
               <Clock className="w-5 h-5 text-amber-500" />
@@ -219,22 +234,22 @@ export default function GuideDashboard() {
             <p className="text-xs text-slate-400 mt-1">Awaiting your response</p>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition">
             <div className="flex items-center justify-between text-slate-500 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider">Completed Tours</span>
-              <CheckCircle2 className="w-5 h-5 text-green-600" />
+              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
             </div>
-            <div className="text-3xl font-extrabold text-green-600">{bookings.filter(b => b.status === 'COMPLETED').length}</div>
+            <div className="text-3xl font-extrabold text-emerald-600">{bookings.filter(b => b.status === 'COMPLETED').length}</div>
             <p className="text-xs text-slate-400 mt-1">Successfully guided</p>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition">
             <div className="flex items-center justify-between text-slate-500 mb-2">
-              <span className="text-xs font-bold uppercase tracking-wider">Total Earnings</span>
+              <span className="text-xs font-bold uppercase tracking-wider">Total Revenue</span>
               <DollarSign className="w-5 h-5 text-emerald-600" />
             </div>
             <div className="text-3xl font-extrabold text-slate-900">₹{stats.total_earnings}</div>
-            <p className="text-xs text-slate-400 mt-1">Confirmed booking revenue</p>
+            <p className="text-xs text-slate-400 mt-1">Confirmed booking earnings</p>
           </div>
         </div>
 
@@ -242,38 +257,70 @@ export default function GuideDashboard() {
         <div className="flex border-b border-slate-200 gap-8">
           <button
             onClick={() => setActiveTab('bookings')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all ${
+            className={`pb-4 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
               activeTab === 'bookings'
                 ? 'border-amber-500 text-amber-600'
                 : 'border-transparent text-slate-500 hover:text-slate-700'
             }`}
           >
-            Tourist Bookings & Requests ({bookings.length})
+            📋 Tourist Bookings & Requests ({bookings.length})
           </button>
           <button
             onClick={() => setActiveTab('profile')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all ${
+            className={`pb-4 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
               activeTab === 'profile'
                 ? 'border-amber-500 text-amber-600'
                 : 'border-transparent text-slate-500 hover:text-slate-700'
             }`}
           >
-            Guide Profile Details
+            🧑‍🏫 Guide Profile Details
           </button>
         </div>
 
         {/* Tab 1: Bookings List */}
         {activeTab === 'bookings' && (
-          <div className="space-y-4">
-            {bookings.length === 0 ? (
-              <div className="bg-white rounded-2xl p-12 text-center border border-slate-200">
+          <div className="space-y-6">
+            
+            {/* Status Filter Pill Buttons */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1 shrink-0 mr-1">
+                <Filter className="w-3.5 h-3.5" /> Filter Status:
+              </span>
+              {[
+                { id: 'ALL', label: 'All Requests', count: bookings.length },
+                { id: 'PENDING', label: '⏳ Pending', count: bookings.filter(b => b.status === 'PENDING').length },
+                { id: 'CONFIRMED', label: '✅ Confirmed', count: bookings.filter(b => b.status === 'CONFIRMED').length },
+                { id: 'COMPLETED', label: '🎉 Completed', count: bookings.filter(b => b.status === 'COMPLETED').length },
+                { id: 'CANCELLED', label: '❌ Rejected', count: bookings.filter(b => b.status === 'REJECTED' || b.status === 'CANCELLED').length }
+              ].map(f => (
+                <button
+                  key={f.id}
+                  onClick={() => setBookingFilter(f.id)}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition shrink-0 flex items-center gap-1.5 ${
+                    bookingFilter === f.id
+                      ? 'bg-slate-900 text-amber-300 shadow-md border border-amber-500/40'
+                      : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  }`}
+                >
+                  <span>{f.label}</span>
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${
+                    bookingFilter === f.id ? 'bg-amber-400 text-slate-950 font-black' : 'bg-slate-100 text-slate-700 font-bold'
+                  }`}>
+                    {f.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {filteredBookings.length === 0 ? (
+              <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-xs">
                 <Calendar className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                <p className="text-slate-600 font-medium">No tourist bookings found yet.</p>
+                <p className="text-slate-700 font-extrabold text-base">No tourist bookings found under '{bookingFilter}' filter.</p>
                 <p className="text-slate-400 text-xs mt-1">When tourists book your guide services, requests will appear here.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-4">
-                {bookings.map((booking) => (
+                {filteredBookings.map((booking) => (
                   <div key={booking.id} className="bg-white rounded-3xl p-6 border border-slate-200 shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:border-amber-400 transition">
                     <div className="space-y-3 flex-1">
                       <div className="flex items-center gap-3">
@@ -345,9 +392,9 @@ export default function GuideDashboard() {
                             <button
                               disabled={actionLoading}
                               onClick={() => handleStatusUpdate(booking.id, 'CONFIRMED')}
-                              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl shadow transition"
+                              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl shadow transition flex items-center gap-1.5"
                             >
-                              Accept Booking
+                              <CheckCircle className="w-3.5 h-3.5" /> Accept Booking
                             </button>
                             <button
                               disabled={actionLoading}
@@ -363,14 +410,14 @@ export default function GuideDashboard() {
                           <button
                             disabled={actionLoading}
                             onClick={() => handleStatusUpdate(booking.id, 'COMPLETED')}
-                            className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black rounded-xl shadow transition"
+                            className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black rounded-xl shadow transition flex items-center gap-1.5"
                           >
-                            Mark Completed
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Mark Completed
                           </button>
                         )}
 
                         {booking.status === 'COMPLETED' && (
-                          <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
+                          <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 flex items-center gap-1">
                             ✓ Tour Completed
                           </span>
                         )}
@@ -392,7 +439,7 @@ export default function GuideDashboard() {
               </h3>
               <button 
                 onClick={() => setActiveTab('edit')} 
-                className="text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 px-3.5 py-1.5 rounded-xl flex items-center gap-1 shadow"
+                className="text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 px-3.5 py-1.5 rounded-xl flex items-center gap-1 shadow transition"
               >
                 <Edit3 className="w-3.5 h-3.5" /> Edit Profile
               </button>
@@ -455,7 +502,7 @@ export default function GuideDashboard() {
 
               <div className="space-y-1 sm:col-span-2">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Bio / Description</span>
-                <div className="text-sm text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                <div className="text-sm text-slate-700 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
                   {guide.bio || guide.description || 'Certified local tourist guide.'}
                 </div>
               </div>
@@ -609,3 +656,4 @@ export default function GuideDashboard() {
     </div>
   );
 }
+
