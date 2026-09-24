@@ -9,6 +9,8 @@ def get_db():
         os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
         g.db = sqlite3.connect(DB_PATH)
         g.db.row_factory = sqlite3.Row
+        create_schema_tables(g.db)
+        create_chat_tables(g.db)
     return g.db
 
 def close_db(e=None):
