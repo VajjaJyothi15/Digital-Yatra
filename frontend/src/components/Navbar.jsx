@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import DigitalYatraLogo from './DigitalYatraLogo';
-import { Compass, ShieldAlert, FileText, MapPin, UserCheck, CalendarCheck, User, LogOut, LogIn, LayoutDashboard, Landmark, Navigation, Menu, X, Edit3, CheckCircle, Settings, BookmarkCheck, Phone, Mail, Globe, Award, Shield, DollarSign } from 'lucide-react';
+import { Compass, ShieldAlert, FileText, MapPin, UserCheck, CalendarCheck, User, LogOut, LogIn, LayoutDashboard, Landmark, Navigation, Menu, X, Edit3, CheckCircle, Settings, BookmarkCheck, Phone, Mail, Shield } from 'lucide-react';
 import { updateUserProfile } from '../api/api';
 
 const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
@@ -9,19 +9,16 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Comprehensive User Profile & Edit Modal State
+  // User Profile & Edit Modal State
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
   const [editName, setEditName] = useState(user?.name || '');
   const [editEmail, setEditEmail] = useState(user?.email || '');
   const [editPhone, setEditPhone] = useState(user?.phone || user?.guide_details?.bio || '');
-  const [editCity, setEditCity] = useState(user?.city || user?.guide_details?.city || 'Goa');
-  const [editDesignation, setEditDesignation] = useState(user?.designation || 'Tourism Officer');
+  const [editDesignation, setEditDesignation] = useState(user?.designation || 'Tourism Security Officer');
 
-  // Role-specific profile fields
-  const [editInterests, setEditInterests] = useState(user?.interests || '');
-  const [editBudget, setEditBudget] = useState(user?.budget_preference || 'Medium');
+  // Role-specific fields for Guide
   const [editLanguages, setEditLanguages] = useState(user?.languages || 'English, Hindi');
   const [editSpecialization, setEditSpecialization] = useState(user?.specialization || 'Heritage & Culture');
   const [editPrice, setEditPrice] = useState(user?.price_per_day || 800);
@@ -39,10 +36,7 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
       setEditName(user.name || '');
       setEditEmail(user.email || '');
       setEditPhone(user.phone || (user.guide_details?.bio ? user.guide_details.bio.replace('Phone: ', '') : ''));
-      setEditCity(user.city || user.guide_details?.city || 'Goa');
       setEditDesignation(user.designation || (userRole === 'ADMIN' ? 'Chief Security Officer' : ''));
-      setEditInterests(user.interests || '');
-      setEditBudget(user.budget_preference || 'Medium');
       setEditLanguages(user.languages || 'English, Hindi');
       setEditSpecialization(user.specialization || 'Heritage & Culture');
       setEditPrice(user.price_per_day || 800);
@@ -218,66 +212,7 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
                 </div>
               </div>
 
-              {/* City / Region Field */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">City / Location</label>
-                <div className="relative">
-                  <input 
-                    type="text" 
-                    disabled={!isEditing}
-                    placeholder="e.g. Goa, Jaipur, Tirupati"
-                    className={`w-full pl-9 pr-4 py-2.5 rounded-xl border text-xs font-bold ${isEditing ? 'bg-white border-blue-500 text-slate-900 ring-2 ring-blue-100' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
-                    value={editCity}
-                    onChange={(e) => setEditCity(e.target.value)}
-                  />
-                  <Globe className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                </div>
-              </div>
-
               {/* ROLE SPECIFIC EXTRA DETAILS */}
-
-              {/* TOURIST EXTRA DETAILS */}
-              {userRole === 'TOURIST' && (
-                <>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Budget Preference</label>
-                    <select 
-                      disabled={!isEditing}
-                      className={`w-full px-3 py-2 rounded-xl border text-xs font-semibold ${isEditing ? 'bg-white border-blue-500 text-slate-900' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
-                      value={editBudget}
-                      onChange={(e) => setEditBudget(e.target.value)}
-                    >
-                      <option value="Low">Budget (Economic)</option>
-                      <option value="Medium">Standard / Comfort (Medium)</option>
-                      <option value="High">Luxury / Premium (High)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Travel Interests</label>
-                    <div className="flex flex-wrap gap-1.5">
-                      {interestOptions.map((opt) => {
-                        const active = currentInterestList.includes(opt);
-                        return (
-                          <button
-                            type="button"
-                            key={opt}
-                            disabled={!isEditing}
-                            onClick={() => toggleInterestItem(opt)}
-                            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition ${
-                              active 
-                                ? 'bg-blue-600 text-white border-blue-600' 
-                                : 'bg-slate-50 text-slate-600 border-slate-200'
-                            }`}
-                          >
-                            {active ? '✓ ' : '+ '} {opt}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </>
-              )}
 
               {/* LOCAL GUIDE EXTRA DETAILS */}
               {userRole === 'GUIDE' && (
@@ -482,38 +417,27 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
           )}
         </div>
 
-        {/* Desktop User Actions: Unique First Letter Avatar Icon + Edit Profile Option + Login / Logout */}
+        {/* Desktop User Actions: Unique First Letter Avatar Profile Chip (Logout removed from navbar, available in Profile modal) */}
         <div className="hidden md:flex nav-user shrink-0 items-center gap-2">
           {user ? (
-            <div className="flex items-center gap-2">
-              {/* Unique User Profile Chip with Initial Avatar */}
-              <button 
-                onClick={handleOpenProfileModal}
-                className="flex items-center gap-2 bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 px-2.5 py-1.5 rounded-2xl transition cursor-pointer group shadow-sm text-left"
-                title="Click to view & edit user profile details"
-              >
-                {/* First Letter Avatar Circle */}
-                <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-400 text-white font-black text-xs flex items-center justify-center shadow-md border border-white/20 group-hover:scale-105 transition">
-                  {firstLetter}
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-slate-100 max-w-[120px] truncate leading-none">
-                    {user.name}
-                  </span>
-                  <span className="text-[9.5px] text-sky-400 font-semibold leading-none mt-0.5">
-                    {userRole} • Profile
-                  </span>
-                </div>
-              </button>
-
-              <button 
-                onClick={() => { onLogout(); navigate('/login'); }} 
-                className="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-2 rounded-xl text-xs font-semibold border border-slate-700 transition flex items-center gap-1"
-                title="Logout from session"
-              >
-                <LogOut size={13} /> Logout
-              </button>
-            </div>
+            <button 
+              onClick={handleOpenProfileModal}
+              className="flex items-center gap-2.5 bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 px-3 py-1.5 rounded-2xl transition cursor-pointer group shadow-sm text-left"
+              title="Click to open profile details & account options"
+            >
+              {/* First Letter Avatar Circle */}
+              <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-400 text-white font-black text-xs flex items-center justify-center shadow-md border border-white/20 group-hover:scale-105 transition">
+                {firstLetter}
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs font-bold text-slate-100 max-w-[130px] truncate leading-none">
+                  {user.name}
+                </span>
+                <span className="text-[9.5px] text-sky-400 font-semibold leading-none mt-0.5">
+                  {userRole} • Profile
+                </span>
+              </div>
+            </button>
           ) : (
             <div className="flex items-center gap-2">
               <Link 
@@ -539,7 +463,7 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
               <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-800/80 border border-slate-700/80 mb-1">
                 <button 
                   onClick={() => { setIsMobileMenuOpen(false); handleOpenProfileModal(); }}
-                  className="flex items-center gap-2.5 text-xs font-semibold text-slate-200 text-left cursor-pointer"
+                  className="flex items-center gap-2.5 text-xs font-semibold text-slate-200 text-left cursor-pointer w-full"
                 >
                   <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-extrabold flex items-center justify-center text-sm shadow-md">
                     {firstLetter}
@@ -548,15 +472,8 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
                     <div className="font-bold text-slate-100 flex items-center gap-1">
                       {user.name} <Edit3 size={11} className="text-sky-400" />
                     </div>
-                    <div className="text-[10px] text-sky-400 font-bold">{userRole} • Tap to view & edit profile</div>
+                    <div className="text-[10px] text-sky-400 font-bold">{userRole} • Tap for profile & account options</div>
                   </div>
-                </button>
-
-                <button 
-                  onClick={() => { setIsMobileMenuOpen(false); onLogout(); navigate('/login'); }} 
-                  className="bg-red-500/20 hover:bg-red-500/30 text-red-400 px-3 py-1.5 rounded-xl text-xs font-bold border border-red-500/30 flex items-center gap-1"
-                >
-                  <LogOut size={13} /> Logout
                 </button>
               </div>
             ) : (
