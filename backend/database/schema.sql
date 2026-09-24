@@ -108,8 +108,9 @@ CREATE TABLE IF NOT EXISTS reports (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
     category TEXT NOT NULL, -- Sanitation, Transport, Overcharging, Safety, Road / Infrastructure, Food / Water, Other
-    latitude REAL NOT NULL,
-    longitude REAL NOT NULL,
+    latitude REAL DEFAULT 0.0,
+    longitude REAL DEFAULT 0.0,
+    location_name TEXT DEFAULT '',
     description TEXT NOT NULL,
     photo_path TEXT,
     status TEXT DEFAULT 'Under Review', -- Under Review, Verified, Resolved, Rejected

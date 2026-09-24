@@ -120,3 +120,29 @@ export const searchLocationByName = async (query) => {
   }
   return null;
 };
+
+/**
+ * Reverse geocode latitude and longitude into a human-readable location name using OpenStreetMap Nominatim
+ */
+export const reverseGeocode = async (lat, lng) => {
+  if (!lat || !lng) return 'Live Location';
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.display_name) {
+        const addr = data.address || {};
+        const parts = [
+          addr.suburb || addr.neighbourhood || addr.amenity || addr.road || addr.attraction,
+          addr.city || addr.town || addr.village || addr.county || addr.district,
+          addr.state
+        ].filter(Boolean);
+        return parts.length > 0 ? parts.join(', ') : data.display_name;
+      }
+    }
+  } catch (err) {
+    console.warn("Reverse geocode failed:", err);
+  }
+  return `Live Location (${typeof lat === 'number' ? lat.toFixed(4) : lat}, ${typeof lng === 'number' ? lng.toFixed(4) : lng})`;
+};
+

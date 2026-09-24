@@ -312,14 +312,21 @@ export default function Admin({ user }) {
                           <span style={{ fontWeight: '600' }}>{rpt.category}</span>
                         </td>
                         <td>
-                          <a 
-                            href={`https://www.google.com/maps?q=${rpt.latitude},${rpt.longitude}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            style={{ color: '#2563EB', fontWeight: '600', fontSize: '0.85rem' }}
-                          >
-                            📍 {rpt.latitude}, {rpt.longitude}
-                          </a>
+                          {rpt.latitude && rpt.longitude && (parseFloat(rpt.latitude) !== 0 || parseFloat(rpt.longitude) !== 0) ? (
+                            <a 
+                              href={`https://www.google.com/maps?q=${rpt.latitude},${rpt.longitude}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{ color: '#2563EB', fontWeight: '600', fontSize: '0.85rem' }}
+                              title={`Coordinates: ${rpt.latitude}, ${rpt.longitude}`}
+                            >
+                              📍 {rpt.location_name || `${rpt.latitude}, ${rpt.longitude}`}
+                            </a>
+                          ) : (
+                            <span style={{ fontWeight: '600', fontSize: '0.85rem', color: '#1E293B' }}>
+                              📍 {rpt.location_name || 'Live Location'}
+                            </span>
+                          )}
                         </td>
                         <td style={{ maxWidth: '240px' }}>
                           {rpt.description}

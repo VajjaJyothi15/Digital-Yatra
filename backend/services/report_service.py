@@ -1,16 +1,26 @@
 from database.db import get_db
 
-def create_incident_report(user_id, category, latitude, longitude, description, photo_path=None):
+def create_incident_report(user_id, category, latitude, longitude, description, photo_path=None, location_name=''):
     """
     Save a tourist incident report into the database with default status 'Under Review'.
     """
     db = get_db()
     cursor = db.cursor()
 
+    try:
+        lat_val = float(latitude) if latitude is not None and str(latitude).strip() != '' else 0.0
+    except (ValueError, TypeError):
+        lat_val = 0.0
+
+    try:
+        lng_val = float(longitude) if longitude is not None and str(longitude).strip() != '' else 0.0
+    except (ValueError, TypeError):
+        lng_val = 0.0
+
     cursor.execute(
-        """INSERT INTO reports (user_id, category, latitude, longitude, description, photo_path, status)
-           VALUES (?, ?, ?, ?, ?, ?, 'Under Review')""",
-        (user_id, category, float(latitude), float(longitude), description, photo_path)
+        """INSERT INTO reports (user_id, category, latitude, longitude, location_name, description, photo_path, status)
+           VALUES (?, ?, ?, ?, ?, ?, ?, 'Under Review')""",
+        (user_id, category, lat_val, lng_val, location_name or '', description, photo_path)
     )
     db.commit()
     report_id = cursor.lastrowid
@@ -19,12 +29,14 @@ def create_incident_report(user_id, category, latitude, longitude, description, 
         "report_id": f"#RPT{report_id + 1000}",
         "db_id": report_id,
         "category": category,
-        "latitude": latitude,
-        "longitude": longitude,
+        "latitude": lat_val,
+        "longitude": lng_val,
+        "location_name": location_name or '',
         "description": description,
         "photo_path": photo_path,
         "status": "Under Review"
     }
+
 
 def get_reports_by_user(user_id):
     db = get_db()

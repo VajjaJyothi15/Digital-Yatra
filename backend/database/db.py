@@ -37,9 +37,17 @@ def create_schema_tables(conn):
                 cursor.execute(f"ALTER TABLE users ADD COLUMN {col[0]} {col[1]}")
             except Exception:
                 pass
+
+        # Add location_name to reports table if missing
+        try:
+            cursor.execute("ALTER TABLE reports ADD COLUMN location_name TEXT DEFAULT ''")
+        except Exception:
+            pass
+
         conn.commit()
     except Exception as e:
         print(f"[DB] Error executing schema.sql / seeding: {e}")
+
 
 
 def create_chat_tables(conn):

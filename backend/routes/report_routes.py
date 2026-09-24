@@ -15,12 +15,13 @@ def allowed_file(filename):
 def submit_report():
     user_id = request.form.get('user_id') or (request.json.get('user_id') if request.is_json else 1)
     category = request.form.get('category') or (request.json.get('category') if request.is_json else None)
-    latitude = request.form.get('latitude') or (request.json.get('latitude') if request.is_json else None)
-    longitude = request.form.get('longitude') or (request.json.get('longitude') if request.is_json else None)
+    latitude = request.form.get('latitude') or (request.json.get('latitude') if request.is_json else 0.0)
+    longitude = request.form.get('longitude') or (request.json.get('longitude') if request.is_json else 0.0)
+    location_name = request.form.get('location_name') or (request.json.get('location_name') if request.is_json else '')
     description = request.form.get('description') or (request.json.get('description') if request.is_json else None)
 
-    if not category or not latitude or not longitude or not description:
-        return jsonify({"success": False, "message": "Category, latitude, longitude, and description are required."}), 400
+    if not category or not description:
+        return jsonify({"success": False, "message": "Category and description are required."}), 400
 
     photo_path = None
     if 'photo' in request.files:
@@ -36,10 +37,11 @@ def submit_report():
     report_result = create_incident_report(
         user_id=int(user_id) if user_id else 1,
         category=category,
-        latitude=float(latitude),
-        longitude=float(longitude),
+        latitude=latitude,
+        longitude=longitude,
         description=description,
-        photo_path=photo_path
+        photo_path=photo_path,
+        location_name=location_name
     )
 
     return jsonify({

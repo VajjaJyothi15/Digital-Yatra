@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { submitReportFormData, getUserReports } from '../api/api';
-import { FileText, MapPin, Upload, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
-import { getLiveLocation } from '../utils/geolocation';
+import { FileText, MapPin, Upload, CheckCircle2, AlertCircle, Clock, Navigation } from 'lucide-react';
+import { getLiveLocation, reverseGeocode } from '../utils/geolocation';
 
 const categories = [
   { id: 'Sanitation', label: 'Sanitation & Restroom', icon: '🚻' },
@@ -17,6 +17,7 @@ const Report = ({ user }) => {
   const [category, setCategory] = useState('Sanitation');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
+  const [locationName, setLocationName] = useState('');
   const [description, setDescription] = useState('');
   const [photoFile, setPhotoFile] = useState(null);
 
@@ -24,7 +25,7 @@ const Report = ({ user }) => {
   const [submittedReport, setSubmittedReport] = useState(null);
   const [error, setError] = useState('');
   const [pastReports, setPastReports] = useState([]);
-  const [gpsStatus, setGpsStatus] = useState('Detecting GPS location...');
+  const [gpsStatus, setGpsStatus] = useState('Detecting live location...');
 
   useEffect(() => {
     detectGPS();
@@ -32,13 +33,28 @@ const Report = ({ user }) => {
   }, []);
 
   const detectGPS = () => {
+    setGpsStatus('⚡ Fetching live GPS & address...');
     getLiveLocation(
-      (loc) => {
-        setLatitude(loc.lat.toFixed(4));
-        setLongitude(loc.lng.toFixed(4));
+      async (loc) => {
+        const latVal = loc.lat.toFixed(4);
+        const lngVal = loc.lng.toFixed(4);
+        setLatitude(latVal);
+        setLongitude(lngVal);
+
+        try {
+          const resolvedAddress = await reverseGeocode(loc.lat, loc.lng);
+          setLocationName(resolvedAddress);
+          setGpsStatus(`🎯 Live Location Active (${latVal}, ${lngVal})`);
+        } catch (e) {
+          setLocationName(`Location (${latVal}, ${lngVal})`);
+          setGpsStatus('🎯 Live GPS Active');
+        }
       },
-      () => {
-        setGpsStatus('⚠️ Location permission denied/unavailable. Please enter coordinates manually.');
+      async () => {
+        setGpsStatus('⚠️ GPS permission restricted. Defaulting to Vijayawada, AP.');
+        setLatitude('16.5062');
+        setLongitude('80.6480');
+        setLocationName('Vijayawada, Andhra Pradesh');
       },
       (status) => setGpsStatus(status)
     );
@@ -66,8 +82,9 @@ const Report = ({ user }) => {
       const formData = new FormData();
       formData.append('user_id', user ? user.id : 1);
       formData.append('category', category);
-      formData.append('latitude', latitude);
-      formData.append('longitude', longitude);
+      formData.append('latitude', latitude || '0.0');
+      formData.append('longitude', longitude || '0.0');
+      formData.append('location_name', locationName || 'Live User Location');
       formData.append('description', description);
       if (photoFile) {
         formData.append('photo', photoFile);
@@ -112,6 +129,9 @@ const Report = ({ user }) => {
             </div>
             <div style={{ fontSize: '0.9rem', marginTop: '4px' }}>
               Category: <strong>{submittedReport.category}</strong>
+            </div>
+            <div style={{ fontSize: '0.9rem', marginTop: '4px' }}>
+              Location: <strong>📍 {submittedReport.location_name || `${submittedReport.latitude}, ${submittedReport.longitude}`}</strong>
             </div>
             <div style={{ fontSize: '0.9rem', marginTop: '2px' }}>
               Status: <span className="trust-badge verified">Under Review</span>
@@ -173,33 +193,33 @@ const Report = ({ user }) => {
             </div>
           </div>
 
-          {/* Location Detection */}
-          <div className="form-group" style={{ marginTop: '20px' }}>
-            <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>2. Location Coordinates</span>
+          {/* Live Location Detection */}
+          <div className="form-group" style={{ marginTop: '24px', marginBottom: '24px' }}>
+            <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <span style={{ fontSize: '1rem', fontWeight: '700' }}>2. Live Reporting Location</span>
               <span style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: '600' }}>{gpsStatus}</span>
             </label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '6px' }}>
-              <div>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Latitude:</span>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <div style={{ position: 'relative', flex: 1 }}>
+                <MapPin size={20} color="var(--primary)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
                 <input 
                   type="text" 
                   className="form-control" 
-                  value={latitude}
-                  onChange={(e) => setLatitude(e.target.value)}
+                  style={{ paddingLeft: '44px', fontWeight: '600', color: 'var(--text-main)', fontSize: '0.95rem' }}
+                  value={locationName}
+                  onChange={(e) => setLocationName(e.target.value)}
+                  placeholder="Detecting your live reporting location..."
                   required 
                 />
               </div>
-              <div>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Longitude:</span>
-                <input 
-                  type="text" 
-                  className="form-control" 
-                  value={longitude}
-                  onChange={(e) => setLongitude(e.target.value)}
-                  required 
-                />
-              </div>
+              <button 
+                type="button" 
+                className="btn btn-secondary"
+                onClick={detectGPS}
+                style={{ padding: '8px 16px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}
+              >
+                <Navigation size={16} /> Refresh GPS
+              </button>
             </div>
           </div>
 
@@ -265,7 +285,7 @@ const Report = ({ user }) => {
                   {rpt.description}
                 </p>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', gap: '16px' }}>
-                  <span>📍 Coordinates: {rpt.latitude}, {rpt.longitude}</span>
+                  <span>📍 Location: {rpt.location_name || `${rpt.latitude}, ${rpt.longitude}`}</span>
                   <span>🗓️ Date: {rpt.created_at}</span>
                 </div>
               </div>
@@ -278,3 +298,4 @@ const Report = ({ user }) => {
 };
 
 export default Report;
+
