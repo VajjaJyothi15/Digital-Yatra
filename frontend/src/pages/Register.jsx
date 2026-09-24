@@ -23,6 +23,7 @@ export default function Register({ onLoginSuccess }) {
   const [languages, setLanguages] = useState('English, Hindi');
   const [specialization, setSpecialization] = useState('Heritage & Culture');
   const [experience, setExperience] = useState('3 years');
+  const [experienceYears, setExperienceYears] = useState(3);
   const [price, setPrice] = useState(800);
 
   // Admin field
@@ -60,7 +61,8 @@ export default function Register({ onLoginSuccess }) {
           city,
           languages,
           specialization,
-          experience,
+          experience: `${experienceYears} Years`,
+          experience_years: Number(experienceYears),
           price: Number(price)
         } : {
           admin_code: adminCode
@@ -249,21 +251,27 @@ export default function Register({ onLoginSuccess }) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Languages Spoken</label>
-                  <input 
-                    type="text" 
-                    required
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-amber-300 bg-amber-50/50 text-indigo-950 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" 
-                    placeholder="English, Hindi, Telugu, Spanish..."
-                    value={languages}
-                    onChange={(e) => setLanguages(e.target.value)}
-                  />
-                  <p className="text-[10px] text-amber-700 font-bold mt-1">💡 Enter all languages you guide in</p>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Daily Rate (₹)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Guide Experience (Years)</label>
                   <input 
                     type="number" 
+                    min="1"
+                    max="50"
+                    required
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none font-bold text-slate-900" 
+                    placeholder="e.g. 5"
+                    value={experienceYears}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setExperienceYears(val);
+                      setExperience(`${val} Years`);
+                    }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Daily Fee Rate (₹/day)</label>
+                  <input 
+                    type="number" 
+                    min="100"
                     required
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none font-bold text-slate-900" 
                     placeholder="800"
@@ -271,6 +279,19 @@ export default function Register({ onLoginSuccess }) {
                     onChange={(e) => setPrice(e.target.value)}
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Languages Spoken (Comma-separated)</label>
+                <input 
+                  type="text" 
+                  required
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-amber-300 bg-amber-50/50 text-indigo-950 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" 
+                  placeholder="English, Hindi, Telugu, Spanish..."
+                  value={languages}
+                  onChange={(e) => setLanguages(e.target.value)}
+                />
+                <p className="text-[10px] text-amber-700 font-bold mt-1">💡 Enter all languages you conduct tours in</p>
               </div>
 
               <div>
