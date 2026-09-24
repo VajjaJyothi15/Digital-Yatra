@@ -146,9 +146,7 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
               >
                 <X size={20} />
               </button>
-            </div>
-
-            {saveSuccess && (
+            </div>            {saveSuccess && (
               <div className="p-3 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-bold border border-emerald-200 flex items-center gap-2">
                 <CheckCircle size={16} className="text-emerald-600" /> {saveSuccess}
               </div>
@@ -160,168 +158,54 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
               </div>
             )}
 
-            {/* Profile Form (View mode / Edit Mode) */}
-            <form onSubmit={handleSaveProfile} className="space-y-3.5">
+            {/* Profile Information (Shows Name & Email ID) */}
+            <div className="space-y-4">
               
-              {/* Name Field */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Full Name</label>
-                <div className="relative">
-                  <input 
-                    type="text" 
-                    disabled={!isEditing}
-                    className={`w-full pl-9 pr-4 py-2.5 rounded-xl border text-xs font-bold ${isEditing ? 'bg-white border-blue-500 text-slate-900 ring-2 ring-blue-100' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    required
-                  />
-                  <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+              {/* Full Name Display */}
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                  <User size={18} />
                 </div>
-              </div>
-
-              {/* Email Address Field */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Mail ID / Email Address</label>
-                <div className="relative">
-                  <input 
-                    type="email" 
-                    disabled={!isEditing}
-                    className={`w-full pl-9 pr-4 py-2.5 rounded-xl border text-xs font-bold ${isEditing ? 'bg-white border-blue-500 text-slate-900 ring-2 ring-blue-100' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
-                    value={editEmail}
-                    onChange={(e) => setEditEmail(e.target.value)}
-                    required
-                  />
-                  <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                </div>
-              </div>
-
-              {/* Phone Number Field */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Phone Number</label>
-                <div className="relative">
-                  <input 
-                    type="tel" 
-                    disabled={!isEditing}
-                    placeholder="+91 9876543210"
-                    className={`w-full pl-9 pr-4 py-2.5 rounded-xl border text-xs font-bold ${isEditing ? 'bg-white border-blue-500 text-slate-900 ring-2 ring-blue-100' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
-                    value={editPhone}
-                    onChange={(e) => setEditPhone(e.target.value)}
-                  />
-                  <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                </div>
-              </div>
-
-              {/* ROLE SPECIFIC EXTRA DETAILS */}
-
-              {/* LOCAL GUIDE EXTRA DETAILS */}
-              {userRole === 'GUIDE' && (
-                <>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Languages Spoken</label>
-                    <input 
-                      type="text" 
-                      disabled={!isEditing}
-                      placeholder="English, Hindi, Telugu"
-                      className={`w-full px-3 py-2 rounded-xl border text-xs font-bold ${isEditing ? 'bg-white border-amber-500 text-slate-900' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
-                      value={editLanguages}
-                      onChange={(e) => setEditLanguages(e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Guide Specialization</label>
-                    <input 
-                      type="text" 
-                      disabled={!isEditing}
-                      placeholder="Heritage & Culture, Wildlife"
-                      className={`w-full px-3 py-2 rounded-xl border text-xs font-bold ${isEditing ? 'bg-white border-amber-500 text-slate-900' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
-                      value={editSpecialization}
-                      onChange={(e) => setEditSpecialization(e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Daily Fee Rate (₹)</label>
-                    <input 
-                      type="number" 
-                      disabled={!isEditing}
-                      className={`w-full px-3 py-2 rounded-xl border text-xs font-bold ${isEditing ? 'bg-white border-amber-500 text-slate-900' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
-                      value={editPrice}
-                      onChange={(e) => setEditPrice(e.target.value)}
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* ADMIN EXTRA DETAILS */}
-              {userRole === 'ADMIN' && (
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Administrator Designation</label>
-                  <div className="relative">
-                    <input 
-                      type="text" 
-                      disabled={!isEditing}
-                      placeholder="Senior Tourism Safety Officer"
-                      className={`w-full pl-9 pr-4 py-2.5 rounded-xl border text-xs font-bold ${isEditing ? 'bg-white border-indigo-500 text-slate-900' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
-                      value={editDesignation}
-                      onChange={(e) => setEditDesignation(e.target.value)}
-                    />
-                    <Shield className="w-4 h-4 text-indigo-500 absolute left-3 top-3" />
-                  </div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Full Name</span>
+                  <span className="text-sm font-extrabold text-slate-900">{user?.name || 'Registered User'}</span>
                 </div>
-              )}
+              </div>
 
-              {/* MODAL ACTION BUTTONS: EDIT, SAVE, SWITCH LOGIN & LOGOUT */}
-              <div className="pt-3 space-y-2 border-t border-slate-100">
-                {!isEditing ? (
-                  <button 
-                    type="button" 
-                    onClick={() => setIsEditing(true)}
-                    className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5"
-                  >
-                    <Edit3 size={14} /> Edit Profile Details
-                  </button>
-                ) : (
-                  <div className="grid grid-cols-2 gap-2">
-                    <button 
-                      type="button" 
-                      onClick={() => setIsEditing(false)}
-                      className="py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-200"
-                    >
-                      Cancel
-                    </button>
-                    <button 
-                      type="submit" 
-                      disabled={saving}
-                      className="py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow transition flex items-center justify-center gap-1"
-                    >
-                      <CheckCircle size={14} /> {saving ? 'Saving...' : 'Save Details'}
-                    </button>
-                  </div>
-                )}
+              {/* Email Address Display */}
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                  <Mail size={18} />
+                </div>
+                <div className="overflow-hidden">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Mail ID / Email Address</span>
+                  <span className="text-sm font-extrabold text-slate-900 truncate block">{user?.email || 'user@example.com'}</span>
+                </div>
+              </div>
 
-                {/* LOGIN & LOGOUT OPTIONS INSIDE PROFILE MODAL */}
-                <div className="grid grid-cols-2 gap-2 pt-1">
+              {/* ACCOUNT ACTIONS: LOGIN / SWITCH & LOGOUT */}
+              <div className="pt-2 space-y-2 border-t border-slate-100">
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => { setShowProfileModal(false); navigate('/login'); }}
-                    className="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 border border-slate-700"
+                    className="py-3 bg-slate-900 hover:bg-slate-800 text-amber-300 font-extrabold text-xs rounded-2xl flex items-center justify-center gap-2 border border-slate-700 shadow-md transition"
                     title="Switch or Login to another account"
                   >
-                    <LogIn size={14} /> Login / Switch Account
+                    <LogIn size={15} /> Login / Switch
                   </button>
 
                   <button
                     type="button"
                     onClick={() => { setShowProfileModal(false); onLogout(); navigate('/login'); }}
-                    className="py-2.5 bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 border border-red-200"
-                    title="Log out from session"
+                    className="py-3 bg-rose-50 hover:bg-rose-100 text-rose-600 font-extrabold text-xs rounded-2xl flex items-center justify-center gap-2 border border-rose-200 transition"
+                    title="Log out from current session"
                   >
-                    <LogOut size={14} /> Logout
+                    <LogOut size={15} /> Logout
                   </button>
                 </div>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
