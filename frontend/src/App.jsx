@@ -28,17 +28,8 @@ function App() {
 
   const [userLocation, setUserLocation] = useState(() => getSavedLiveLocation());
 
-  // Automatically request/listen to live GPS location across all pages
+  // Listen for live GPS location updates across all pages
   useEffect(() => {
-    // Prompt device GPS on initial load if not present or staled
-    getLiveLocation(
-      (loc) => {
-        setUserLocation(loc);
-        saveLiveLocation(loc);
-      },
-      (err) => console.warn("Global GPS notice:", err.message)
-    );
-
     const handleLocationUpdateEvent = (e) => {
       if (e.detail && e.detail.lat && e.detail.lng) {
         setUserLocation(e.detail);
