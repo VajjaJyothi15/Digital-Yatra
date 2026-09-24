@@ -9,6 +9,27 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 # Temporary in-memory store for password reset tokens
 reset_tokens = {}
 
+def format_user_dict(db, user_row):
+    if not user_row:
+        return None
+    user = dict(user_row)
+    # Remove password hash for security
+    user.pop('password_hash', None)
+    
+    # If user is a guide, pull extra guide profile details
+    if user.get('role') == 'GUIDE':
+        guide_row = db.execute("SELECT * FROM guides WHERE user_id = ?", (user['id'],)).fetchone()
+        if guide_row:
+            user['guide_details'] = dict(guide_row)
+            user['phone'] = user.get('phone') or guide_row['bio'] or ''
+            user['city'] = user.get('city') or guide_row['city']
+            user['languages'] = guide_row['languages']
+            user['specialization'] = guide_row['specialization']
+            user['price_per_day'] = guide_row['price_per_day']
+            user['verification_status'] = guide_row['verification_status']
+
+    return user
+
 @auth_bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json() or {}
@@ -18,13 +39,14 @@ def register():
     role = data.get('role', 'TOURIST').upper()
     interests = data.get('interests', '')
     budget_preference = data.get('budget_preference', 'Medium')
+    phone = data.get('phone', '').strip()
+    city = data.get('city', 'Goa').strip()
+    designation = data.get('designation', '').strip()
 
     # Guide specific optional registration fields
-    city = data.get('city', 'Goa')
     languages = data.get('languages', 'Hindi, English')
     specialization = data.get('specialization', 'Heritage & Culture')
     price_per_day = float(data.get('price_per_day') or data.get('price') or 800.0)
-    phone = data.get('phone', '')
     experience = data.get('experience', '3 years')
 
     if not name:
@@ -43,8 +65,8 @@ def register():
     cursor = db.cursor()
 
     cursor.execute(
-        "INSERT INTO users (name, email, password_hash, role, interests, budget_preference) VALUES (?, ?, ?, ?, ?, ?)",
-        (name, email, password_hash, role, interests, budget_preference)
+        "INSERT INTO users (name, email, password_hash, role, interests, budget_preference, phone, city, designation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (name, email, password_hash, role, interests, budget_preference, phone, city, designation)
     )
     user_id = cursor.lastrowid
 
@@ -59,14 +81,8 @@ def register():
 
     db.commit()
 
-    user = {
-        "id": user_id,
-        "name": name,
-        "email": email,
-        "role": role,
-        "interests": interests,
-        "budget_preference": budget_preference
-    }
+    user_row = db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    user = format_user_dict(db, user_row)
 
     return jsonify({
         "success": True,
@@ -89,14 +105,7 @@ def login():
     if not user_row or not check_password_hash(user_row['password_hash'], password):
         return jsonify({"success": False, "message": "Invalid email or password."}), 401
 
-    user = {
-        "id": user_row['id'],
-        "name": user_row['name'],
-        "email": user_row['email'],
-        "role": user_row['role'] or 'TOURIST',
-        "interests": user_row['interests'],
-        "budget_preference": user_row['budget_preference']
-    }
+    user = format_user_dict(db, user_row)
 
     return jsonify({
         "success": True,
@@ -116,7 +125,7 @@ def forgot_password():
     user_row = db.execute("SELECT id, name FROM users WHERE email = ?", (email,)).fetchone()
 
     if not user_row:
-        return jsonify({"success": False, "message": "No account found with this email address."}), 44
+        return jsonify({"success": False, "message": "No account found with this email address."}), 404
 
     token = secrets.token_hex(16)
     reset_tokens[token] = email
@@ -185,18 +194,9 @@ def google_auth():
         )
         db.commit()
         user_id = cursor.lastrowid
-        user_role = role
-    else:
-        user_id = user_row['id']
-        name = user_row['name']
-        user_role = user_row['role'] or 'TOURIST'
+        user_row = db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
 
-    user = {
-        "id": user_id,
-        "name": name,
-        "email": email,
-        "role": user_role
-    }
+    user = format_user_dict(db, user_row)
 
     return jsonify({
         "success": True,
@@ -211,13 +211,14 @@ def get_current_user():
         return jsonify({"success": False, "message": "Email parameter required."}), 400
 
     db = get_db()
-    user_row = db.execute("SELECT id, name, email, role, interests, budget_preference, created_at FROM users WHERE email = ?", (email,)).fetchone()
+    user_row = db.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
     if not user_row:
         return jsonify({"success": False, "message": "User not found."}), 404
 
+    user = format_user_dict(db, user_row)
     return jsonify({
         "success": True,
-        "user": dict(user_row)
+        "user": user
     })
 
 @auth_bp.route('/profile/update', methods=['POST', 'PUT'])
@@ -226,8 +227,16 @@ def update_profile():
     user_id = data.get('id')
     email = data.get('email', '').strip()
     name = data.get('name', '').strip()
+    phone = data.get('phone', '').strip()
+    city = data.get('city', '').strip()
+    designation = data.get('designation', '').strip()
     interests = data.get('interests', '')
     budget_preference = data.get('budget_preference', 'Medium')
+
+    # Guide specific fields
+    languages = data.get('languages', '')
+    specialization = data.get('specialization', '')
+    price_per_day = data.get('price_per_day') or data.get('price')
 
     if not name:
         return jsonify({"success": False, "message": "Full name cannot be empty."}), 400
@@ -235,36 +244,63 @@ def update_profile():
     db = get_db()
     if user_id:
         db.execute(
-            "UPDATE users SET name = ?, interests = ?, budget_preference = ? WHERE id = ?",
-            (name, interests, budget_preference, user_id)
+            "UPDATE users SET name = ?, phone = ?, city = ?, designation = ?, interests = ?, budget_preference = ? WHERE id = ?",
+            (name, phone, city, designation, interests, budget_preference, user_id)
         )
     elif email:
         db.execute(
-            "UPDATE users SET name = ?, interests = ?, budget_preference = ? WHERE email = ?",
-            (name, interests, budget_preference, email)
+            "UPDATE users SET name = ?, phone = ?, city = ?, designation = ?, interests = ?, budget_preference = ? WHERE email = ?",
+            (name, phone, city, designation, interests, budget_preference, email)
         )
     else:
         return jsonify({"success": False, "message": "User identification required."}), 400
 
+    # If guide profile exists, update guides table too
+    target_id = user_id
+    if not target_id and email:
+        u_row = db.execute("SELECT id FROM users WHERE email = ?", (email,)).fetchone()
+        if u_row:
+            target_id = u_row['id']
+
+    if target_id:
+        guide_row = db.execute("SELECT id FROM guides WHERE user_id = ?", (target_id,)).fetchone()
+        if guide_row:
+            update_query = "UPDATE guides SET name = ?"
+            params = [name]
+            if city:
+                update_query += ", city = ?"
+                params.append(city)
+            if languages:
+                update_query += ", languages = ?"
+                params.append(languages)
+            if specialization:
+                update_query += ", specialization = ?"
+                params.append(specialization)
+            if price_per_day is not None:
+                update_query += ", price_per_day = ?"
+                params.append(float(price_per_day))
+            if phone:
+                update_query += ", bio = ?"
+                params.append(f"Phone: {phone}")
+
+            update_query += " WHERE user_id = ?"
+            params.append(target_id)
+            db.execute(update_query, tuple(params))
+
     db.commit()
 
     # Retrieve updated record
-    if user_id:
-        user_row = db.execute("SELECT id, name, email, role, interests, budget_preference FROM users WHERE id = ?", (user_id,)).fetchone()
+    if target_id:
+        user_row = db.execute("SELECT * FROM users WHERE id = ?", (target_id,)).fetchone()
     else:
-        user_row = db.execute("SELECT id, name, email, role, interests, budget_preference FROM users WHERE email = ?", (email,)).fetchone()
+        user_row = db.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
 
-    updated_user = dict(user_row) if user_row else {
-        "id": user_id,
-        "name": name,
-        "email": email,
-        "interests": interests,
-        "budget_preference": budget_preference
-    }
+    updated_user = format_user_dict(db, user_row)
 
     return jsonify({
         "success": True,
         "message": "Profile updated successfully!",
         "user": updated_user
     })
+
 

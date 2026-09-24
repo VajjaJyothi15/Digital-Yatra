@@ -29,8 +29,18 @@ def create_schema_tables(conn):
         # Import and run idempotent seed function if tables are empty
         from database.seed import seed_data_if_empty
         seed_data_if_empty(conn)
+
+        # Add profile columns safely if missing
+        cursor = conn.cursor()
+        for col in [("phone", "TEXT DEFAULT ''"), ("city", "TEXT DEFAULT ''"), ("designation", "TEXT DEFAULT ''")]:
+            try:
+                cursor.execute(f"ALTER TABLE users ADD COLUMN {col[0]} {col[1]}")
+            except Exception:
+                pass
+        conn.commit()
     except Exception as e:
         print(f"[DB] Error executing schema.sql / seeding: {e}")
+
 
 def create_chat_tables(conn):
     try:

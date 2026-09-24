@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import DigitalYatraLogo from './DigitalYatraLogo';
-import { Compass, ShieldAlert, FileText, MapPin, UserCheck, CalendarCheck, User, LogOut, LogIn, LayoutDashboard, Landmark, Navigation, Menu, X, Edit3, CheckCircle, Settings, BookmarkCheck } from 'lucide-react';
+import { Compass, ShieldAlert, FileText, MapPin, UserCheck, CalendarCheck, User, LogOut, LogIn, LayoutDashboard, Landmark, Navigation, Menu, X, Edit3, CheckCircle, Settings, BookmarkCheck, Phone, Mail, Globe, Award, Shield, DollarSign } from 'lucide-react';
 import { updateUserProfile } from '../api/api';
 
 const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
@@ -9,11 +9,23 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Edit Profile Modal State
+  // Comprehensive User Profile & Edit Modal State
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+
   const [editName, setEditName] = useState(user?.name || '');
+  const [editEmail, setEditEmail] = useState(user?.email || '');
+  const [editPhone, setEditPhone] = useState(user?.phone || user?.guide_details?.bio || '');
+  const [editCity, setEditCity] = useState(user?.city || user?.guide_details?.city || 'Goa');
+  const [editDesignation, setEditDesignation] = useState(user?.designation || 'Tourism Officer');
+
+  // Role-specific profile fields
   const [editInterests, setEditInterests] = useState(user?.interests || '');
   const [editBudget, setEditBudget] = useState(user?.budget_preference || 'Medium');
+  const [editLanguages, setEditLanguages] = useState(user?.languages || 'English, Hindi');
+  const [editSpecialization, setEditSpecialization] = useState(user?.specialization || 'Heritage & Culture');
+  const [editPrice, setEditPrice] = useState(user?.price_per_day || 800);
+
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState('');
   const [saveError, setSaveError] = useState('');
@@ -21,14 +33,21 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
   const userRole = user?.role || 'TOURIST';
   const firstLetter = user?.name ? user.name.trim()[0].toUpperCase() : 'U';
 
-  // Sync state when user prop changes
+  // Sync profile state when user prop changes
   useEffect(() => {
     if (user) {
       setEditName(user.name || '');
+      setEditEmail(user.email || '');
+      setEditPhone(user.phone || (user.guide_details?.bio ? user.guide_details.bio.replace('Phone: ', '') : ''));
+      setEditCity(user.city || user.guide_details?.city || 'Goa');
+      setEditDesignation(user.designation || (userRole === 'ADMIN' ? 'Chief Security Officer' : ''));
       setEditInterests(user.interests || '');
       setEditBudget(user.budget_preference || 'Medium');
+      setEditLanguages(user.languages || 'English, Hindi');
+      setEditSpecialization(user.specialization || 'Heritage & Culture');
+      setEditPrice(user.price_per_day || 800);
     }
-  }, [user]);
+  }, [user, userRole]);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -40,9 +59,7 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
   };
 
   const handleOpenProfileModal = () => {
-    setEditName(user?.name || '');
-    setEditInterests(user?.interests || '');
-    setEditBudget(user?.budget_preference || 'Medium');
+    setIsEditing(false);
     setSaveSuccess('');
     setSaveError('');
     setShowProfileModal(true);
@@ -57,10 +74,16 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
     try {
       const res = await updateUserProfile({
         id: user?.id,
-        email: user?.email,
+        email: editEmail || user?.email,
         name: editName,
+        phone: editPhone,
+        city: editCity,
+        designation: editDesignation,
         interests: editInterests,
-        budget_preference: editBudget
+        budget_preference: editBudget,
+        languages: editLanguages,
+        specialization: editSpecialization,
+        price_per_day: editPrice
       });
 
       if (res.success) {
@@ -68,10 +91,10 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
         if (onUpdateUser) {
           onUpdateUser(res.user);
         }
+        setIsEditing(false);
         setTimeout(() => {
-          setShowProfileModal(false);
           setSaveSuccess('');
-        }, 1500);
+        }, 2000);
       } else {
         setSaveError(res.message || 'Failed to update profile.');
       }
@@ -97,22 +120,31 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
 
   return (
     <>
-      {/* EDIT PROFILE & ACCOUNT MODAL */}
+      {/* USER PROFILE & ACCOUNT MODAL (Contains Name, Phone, Email, Role Details, Login & Logout) */}
       {showProfileModal && (
         <div className="fixed inset-0 z-[2700] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200 space-y-5 animate-scaleUp">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200 space-y-5 animate-scaleUp max-h-[90vh] overflow-y-auto">
             
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 text-white font-black text-lg flex items-center justify-center shadow-md border border-white/30">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 text-white font-black text-xl flex items-center justify-center shadow-lg border border-white/30">
                   {firstLetter}
                 </div>
                 <div>
                   <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-1.5">
-                    User Account & Profile
+                    {user?.name || 'User Profile'}
                   </h3>
-                  <p className="text-xs text-slate-500 font-medium">{user?.email || 'Logged in account'}</p>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase ${
+                      userRole === 'ADMIN' ? 'bg-indigo-100 text-indigo-700' :
+                      userRole === 'GUIDE' ? 'bg-amber-100 text-amber-800' :
+                      'bg-blue-100 text-blue-700'
+                    }`}>
+                      {userRole}
+                    </span>
+                    <span className="text-xs text-slate-500 truncate max-w-[160px]">{user?.email}</span>
+                  </div>
                 </div>
               </div>
               <button 
@@ -135,14 +167,17 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
               </div>
             )}
 
-            {/* Profile Edit Form */}
-            <form onSubmit={handleSaveProfile} className="space-y-4">
+            {/* Profile Form (View mode / Edit Mode) */}
+            <form onSubmit={handleSaveProfile} className="space-y-3.5">
+              
+              {/* Name Field */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Full Display Name</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Full Name</label>
                 <div className="relative">
                   <input 
                     type="text" 
-                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    disabled={!isEditing}
+                    className={`w-full pl-9 pr-4 py-2.5 rounded-xl border text-xs font-bold ${isEditing ? 'bg-white border-blue-500 text-slate-900 ring-2 ring-blue-100' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
                     required
@@ -151,20 +186,64 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
                 </div>
               </div>
 
+              {/* Email Address Field */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Account Role</label>
-                <div className="px-3.5 py-2 rounded-xl bg-slate-100 text-slate-800 text-xs font-extrabold border border-slate-200 flex items-center justify-between">
-                  <span>{userRole} ACCOUNT</span>
-                  <span className="text-[10px] text-blue-600 font-bold uppercase">Active Status</span>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Mail ID / Email Address</label>
+                <div className="relative">
+                  <input 
+                    type="email" 
+                    disabled={!isEditing}
+                    className={`w-full pl-9 pr-4 py-2.5 rounded-xl border text-xs font-bold ${isEditing ? 'bg-white border-blue-500 text-slate-900 ring-2 ring-blue-100' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
+                    value={editEmail}
+                    onChange={(e) => setEditEmail(e.target.value)}
+                    required
+                  />
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 </div>
               </div>
 
+              {/* Phone Number Field */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Phone Number</label>
+                <div className="relative">
+                  <input 
+                    type="tel" 
+                    disabled={!isEditing}
+                    placeholder="+91 9876543210"
+                    className={`w-full pl-9 pr-4 py-2.5 rounded-xl border text-xs font-bold ${isEditing ? 'bg-white border-blue-500 text-slate-900 ring-2 ring-blue-100' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
+                    value={editPhone}
+                    onChange={(e) => setEditPhone(e.target.value)}
+                  />
+                  <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                </div>
+              </div>
+
+              {/* City / Region Field */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">City / Location</label>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    disabled={!isEditing}
+                    placeholder="e.g. Goa, Jaipur, Tirupati"
+                    className={`w-full pl-9 pr-4 py-2.5 rounded-xl border text-xs font-bold ${isEditing ? 'bg-white border-blue-500 text-slate-900 ring-2 ring-blue-100' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
+                    value={editCity}
+                    onChange={(e) => setEditCity(e.target.value)}
+                  />
+                  <Globe className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                </div>
+              </div>
+
+              {/* ROLE SPECIFIC EXTRA DETAILS */}
+
+              {/* TOURIST EXTRA DETAILS */}
               {userRole === 'TOURIST' && (
                 <>
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">Budget Preference</label>
                     <select 
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      disabled={!isEditing}
+                      className={`w-full px-3 py-2 rounded-xl border text-xs font-semibold ${isEditing ? 'bg-white border-blue-500 text-slate-900' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
                       value={editBudget}
                       onChange={(e) => setEditBudget(e.target.value)}
                     >
@@ -183,11 +262,12 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
                           <button
                             type="button"
                             key={opt}
+                            disabled={!isEditing}
                             onClick={() => toggleInterestItem(opt)}
                             className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition ${
                               active 
-                                ? 'bg-blue-600 text-white border-blue-600 shadow-xs' 
-                                : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                                ? 'bg-blue-600 text-white border-blue-600' 
+                                : 'bg-slate-50 text-slate-600 border-slate-200'
                             }`}
                           >
                             {active ? '✓ ' : '+ '} {opt}
@@ -199,30 +279,109 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
                 </>
               )}
 
-              {/* Action Buttons inside Profile Modal */}
-              <div className="pt-2 space-y-2">
-                <button 
-                  type="submit" 
-                  disabled={saving}
-                  className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5"
-                >
-                  <Edit3 size={14} /> {saving ? 'Saving Changes...' : 'Save Profile Details'}
-                </button>
+              {/* LOCAL GUIDE EXTRA DETAILS */}
+              {userRole === 'GUIDE' && (
+                <>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Languages Spoken</label>
+                    <input 
+                      type="text" 
+                      disabled={!isEditing}
+                      placeholder="English, Hindi, Telugu"
+                      className={`w-full px-3 py-2 rounded-xl border text-xs font-bold ${isEditing ? 'bg-white border-amber-500 text-slate-900' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
+                      value={editLanguages}
+                      onChange={(e) => setEditLanguages(e.target.value)}
+                    />
+                  </div>
 
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  {userRole === 'TOURIST' && (
-                    <button
-                      type="button"
-                      onClick={() => { setShowProfileModal(false); navigate('/my-bookings'); }}
-                      className="py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl flex items-center justify-center gap-1 border border-slate-200"
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Guide Specialization</label>
+                    <input 
+                      type="text" 
+                      disabled={!isEditing}
+                      placeholder="Heritage & Culture, Wildlife"
+                      className={`w-full px-3 py-2 rounded-xl border text-xs font-bold ${isEditing ? 'bg-white border-amber-500 text-slate-900' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
+                      value={editSpecialization}
+                      onChange={(e) => setEditSpecialization(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Daily Fee Rate (₹)</label>
+                    <input 
+                      type="number" 
+                      disabled={!isEditing}
+                      className={`w-full px-3 py-2 rounded-xl border text-xs font-bold ${isEditing ? 'bg-white border-amber-500 text-slate-900' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
+                      value={editPrice}
+                      onChange={(e) => setEditPrice(e.target.value)}
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* ADMIN EXTRA DETAILS */}
+              {userRole === 'ADMIN' && (
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Administrator Designation</label>
+                  <div className="relative">
+                    <input 
+                      type="text" 
+                      disabled={!isEditing}
+                      placeholder="Senior Tourism Safety Officer"
+                      className={`w-full pl-9 pr-4 py-2.5 rounded-xl border text-xs font-bold ${isEditing ? 'bg-white border-indigo-500 text-slate-900' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
+                      value={editDesignation}
+                      onChange={(e) => setEditDesignation(e.target.value)}
+                    />
+                    <Shield className="w-4 h-4 text-indigo-500 absolute left-3 top-3" />
+                  </div>
+                </div>
+              )}
+
+              {/* MODAL ACTION BUTTONS: EDIT, SAVE, SWITCH LOGIN & LOGOUT */}
+              <div className="pt-3 space-y-2 border-t border-slate-100">
+                {!isEditing ? (
+                  <button 
+                    type="button" 
+                    onClick={() => setIsEditing(true)}
+                    className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5"
+                  >
+                    <Edit3 size={14} /> Edit Profile Details
+                  </button>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    <button 
+                      type="button" 
+                      onClick={() => setIsEditing(false)}
+                      className="py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-200"
                     >
-                      <BookmarkCheck size={14} /> My Bookings
+                      Cancel
                     </button>
-                  )}
+                    <button 
+                      type="submit" 
+                      disabled={saving}
+                      className="py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow transition flex items-center justify-center gap-1"
+                    >
+                      <CheckCircle size={14} /> {saving ? 'Saving...' : 'Save Details'}
+                    </button>
+                  </div>
+                )}
+
+                {/* LOGIN & LOGOUT OPTIONS INSIDE PROFILE MODAL */}
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => { setShowProfileModal(false); navigate('/login'); }}
+                    className="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 border border-slate-700"
+                    title="Switch or Login to another account"
+                  >
+                    <LogIn size={14} /> Login / Switch Account
+                  </button>
+
                   <button
                     type="button"
                     onClick={() => { setShowProfileModal(false); onLogout(); navigate('/login'); }}
-                    className={`py-2.5 bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs rounded-xl flex items-center justify-center gap-1 border border-red-200 ${userRole !== 'TOURIST' ? 'col-span-2' : ''}`}
+                    className="py-2.5 bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 border border-red-200"
+                    title="Log out from session"
                   >
                     <LogOut size={14} /> Logout
                   </button>
@@ -323,7 +482,7 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
           )}
         </div>
 
-        {/* Desktop User Actions: Unique Profile Avatar Icon + Edit Profile Option + Logout */}
+        {/* Desktop User Actions: Unique First Letter Avatar Icon + Edit Profile Option + Login / Logout */}
         <div className="hidden md:flex nav-user shrink-0 items-center gap-2">
           {user ? (
             <div className="flex items-center gap-2">
@@ -342,7 +501,7 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
                     {user.name}
                   </span>
                   <span className="text-[9.5px] text-sky-400 font-semibold leading-none mt-0.5">
-                    {userRole} • Edit Profile
+                    {userRole} • Profile
                   </span>
                 </div>
               </button>
@@ -389,7 +548,7 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
                     <div className="font-bold text-slate-100 flex items-center gap-1">
                       {user.name} <Edit3 size={11} className="text-sky-400" />
                     </div>
-                    <div className="text-[10px] text-sky-400 font-bold">{userRole} • Tap to edit profile</div>
+                    <div className="text-[10px] text-sky-400 font-bold">{userRole} • Tap to view & edit profile</div>
                   </div>
                 </button>
 
