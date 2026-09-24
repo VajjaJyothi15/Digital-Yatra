@@ -234,7 +234,7 @@ export default function BookGuide() {
                         {guide.name ? guide.name.charAt(0) : 'G'}
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold text-slate-900">{guide.name}</h3>
+                        <h3 className="text-lg font-bold text-amber-600">{guide.name}</h3>
                         <div className="flex items-center gap-1 text-xs text-amber-500 font-bold mt-0.5">
                           <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> {guide.rating || 4.8} 
                           <span className="text-slate-400 font-normal">({guide.reviews_count || 12} reviews)</span>

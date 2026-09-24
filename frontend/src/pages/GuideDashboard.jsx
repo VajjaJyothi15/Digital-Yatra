@@ -165,7 +165,7 @@ export default function GuideDashboard() {
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1">
-                <h1 className="text-2xl font-extrabold">{guide?.name || 'Local Guide Portal'}</h1>
+                <h1 className="text-2xl font-extrabold text-amber-400">{guide?.name || 'Local Guide Portal'}</h1>
                 <span className={`text-[11px] font-extrabold px-3 py-1 rounded-full ${
                   guide?.verified ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
                 }`}>
@@ -401,7 +401,7 @@ export default function GuideDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm text-slate-700">
               <div className="space-y-1">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Full Name</span>
-                <div className="text-base font-extrabold text-slate-900">{guide.name}</div>
+                <div className="text-base font-extrabold text-amber-600">{guide.name}</div>
               </div>
 
               <div className="space-y-1">
