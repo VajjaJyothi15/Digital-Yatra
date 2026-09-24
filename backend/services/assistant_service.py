@@ -292,15 +292,23 @@ def extract_source_text(msg, history=None):
     return res.strip() or msg.strip()
 
 def translate_gtx(text, lang_code):
-    url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl={lang_code}&dt=t&q={urllib.parse.quote(text)}"
+    """
+    Translates text to target language code using MyMemory Open Translation API.
+    Falls back gracefully to local engine if network fails.
+    """
+    url = f"https://api.mymemory.translated.net/get?q={urllib.parse.quote(text)}&langpair=autodetect|{lang_code}"
     try:
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req, timeout=5) as response:
             data = json.loads(response.read().decode('utf-8'))
-            translated_parts = [part[0] for part in data[0] if part[0]]
-            return "".join(translated_parts)
+            if data and "responseData" in data and "translatedText" in data["responseData"]:
+                res_text = data["responseData"]["translatedText"]
+                if res_text and not res_text.startswith("MYMEMORY WARNING"):
+                    return res_text
+        return None
     except Exception as e:
         return None
+
 
 
 # ==========================================

@@ -59,9 +59,6 @@ const MapClickListener = ({ onMapClick }) => {
 };
 
 export default function MapView({ center, markers = [], userLocation, destinationLocation, onMapClick }) {
-  const googleMapsKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-  const [googleLoaded, setGoogleLoaded] = useState(false);
-
   // Determine points for auto bounds
   const pointsForBounds = [];
   if (userLocation && userLocation.lat && userLocation.lng) {
@@ -82,25 +79,13 @@ export default function MapView({ center, markers = [], userLocation, destinatio
             ? [markers[0].latitude, markers[0].longitude] 
             : [26.9239, 75.8267]); // Dynamic Jaipur/Goa fallback
 
-  useEffect(() => {
-    if (googleMapsKey && !window.google) {
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${googleMapsKey}&libraries=places`;
-      script.async = true;
-      script.onload = () => setGoogleLoaded(true);
-      document.head.appendChild(script);
-    } else if (window.google) {
-      setGoogleLoaded(true);
-    }
-  }, [googleMapsKey]);
-
   return (
     <div style={{ width: '100%', height: '100%', minHeight: '450px', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)', position: 'relative' }}>
       
       {/* Map Header Status Badge */}
       <div className="absolute top-3 right-3 z-[1000] bg-slate-900/90 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-lg backdrop-blur-md border border-white/20 flex items-center gap-1.5">
         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-        <span>{googleMapsKey && googleLoaded ? '🌍 GOOGLE MAPS ACTIVE' : '🗺️ INTERACTIVE MAP ACTIVE'}</span>
+        <span>🗺️ INTERACTIVE MAP ACTIVE</span>
       </div>
 
       <MapContainer 
