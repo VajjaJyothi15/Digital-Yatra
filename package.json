@@ -1,0 +1,14 @@
+{
+  "name": "digital-yatra",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Digital Yatra - AI Travel & Tourism Companion",
+  "main": "backend/app.py",
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "start": "cd backend && python app.py"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
