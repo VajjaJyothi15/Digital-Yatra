@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getGuideDashboard, updateBookingStatus, updateGuideProfile, updateGuideAvailability } from '../api/api';
 import { 
   UserCheck, Calendar, DollarSign, CheckCircle2, Clock, XCircle, 
-  Settings, Award, ShieldCheck, MapPin, AlertCircle, RefreshCw, Globe, Sparkles, Edit3, Save, Camera, Check, Filter, User, Mail, Shield, CheckCircle, Navigation
+  Settings, Award, ShieldCheck, MapPin, AlertCircle, RefreshCw, Globe, Sparkles, Edit3, Save, Camera, Check, Filter, User, Mail, Shield, CheckCircle, Navigation, Star, MessageSquare
 } from 'lucide-react';
 
 export default function GuideDashboard() {
@@ -280,20 +280,30 @@ export default function GuideDashboard() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex border-b border-slate-200 gap-8">
+        <div className="flex border-b border-slate-200 gap-8 overflow-x-auto">
           <button
             onClick={() => setActiveTab('bookings')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
+            className={`pb-4 text-sm font-bold border-b-2 transition-all flex items-center gap-2 shrink-0 ${
               activeTab === 'bookings'
                 ? 'border-amber-500 text-amber-600'
                 : 'border-transparent text-slate-500 hover:text-slate-700'
             }`}
           >
-            📋 Tourist Bookings & Requests ({bookings.length})
+            📋 Tourist Bookings ({bookings.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('reviews')}
+            className={`pb-4 text-sm font-bold border-b-2 transition-all flex items-center gap-2 shrink-0 ${
+              activeTab === 'reviews'
+                ? 'border-amber-500 text-amber-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            ⭐ Reviews Received ({(dashboardData?.reviews || []).length})
           </button>
           <button
             onClick={() => setActiveTab('profile')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
+            className={`pb-4 text-sm font-bold border-b-2 transition-all flex items-center gap-2 shrink-0 ${
               activeTab === 'profile'
                 ? 'border-amber-500 text-amber-600'
                 : 'border-transparent text-slate-500 hover:text-slate-700'
@@ -456,7 +466,72 @@ export default function GuideDashboard() {
           </div>
         )}
 
-        {/* Tab 2: Profile View & Inline Edit */}
+        {/* Tab 2: Tourist Reviews Received */}
+        {activeTab === 'reviews' && (
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-md max-w-4xl space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                  <Star className="w-5 h-5 text-amber-500 fill-amber-400" /> Tourist Ratings & Reviews Received
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Feedback posted by tourists who booked your local guide services.
+                </p>
+              </div>
+              <div className="text-right">
+                <span className="text-xl font-black text-amber-500">⭐ {guide.rating || 5.0} / 5.0</span>
+                <span className="text-xs text-slate-400 block">({(dashboardData?.reviews || []).length} Reviews)</span>
+              </div>
+            </div>
+
+            {(dashboardData?.reviews || []).length === 0 ? (
+              <div className="p-12 text-center bg-slate-50 rounded-2xl border border-slate-200">
+                <MessageSquare className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                <p className="text-slate-700 font-extrabold text-base">No Tourist Reviews Received Yet</p>
+                <p className="text-slate-400 text-xs mt-1">When tourists complete tours and post feedback, reviews will appear here.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {(dashboardData?.reviews || []).map((rev) => (
+                  <div key={rev.id} className="bg-slate-50 rounded-2xl p-5 border border-slate-200 space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/60 pb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-9 h-9 rounded-xl bg-amber-500 text-slate-950 font-extrabold text-sm flex items-center justify-center shrink-0 shadow-xs">
+                          {rev.tourist_name ? rev.tourist_name.charAt(0) : 'T'}
+                        </div>
+                        <div>
+                          <span className="text-xs font-extrabold text-slate-900 block">{rev.tourist_name}</span>
+                          <span className="text-[10px] text-slate-400">{rev.tourist_email}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-black bg-amber-100 text-amber-900 px-3 py-1 rounded-xl border border-amber-300">
+                          ⭐ Guide Rating: {rev.guide_rating || 5.0} / 5
+                        </span>
+                        {rev.destination_name && (
+                          <span className="text-xs font-bold bg-slate-900 text-amber-300 px-2.5 py-1 rounded-xl">
+                            📍 {rev.destination_name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <p className="text-xs sm:text-sm text-slate-800 font-medium leading-relaxed bg-white p-3.5 rounded-xl border border-slate-200/80">
+                      "{rev.comments}"
+                    </p>
+
+                    <div className="text-[10px] text-slate-400 font-bold text-right">
+                      Received on: {rev.created_at || 'Recently'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab 3: Profile View & Inline Edit */}
         {activeTab === 'profile' && (
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-md max-w-3xl space-y-6">
             

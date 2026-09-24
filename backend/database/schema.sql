@@ -139,3 +139,19 @@ CREATE TABLE IF NOT EXISTS fares (
     est_time_mins INTEGER DEFAULT 20
 );
 
+CREATE TABLE IF NOT EXISTS tourist_reviews (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tourist_id INTEGER NOT NULL,
+    tourist_name TEXT NOT NULL,
+    tourist_email TEXT,
+    destination_name TEXT DEFAULT '',
+    destination_rating REAL DEFAULT 5.0,
+    guide_id INTEGER DEFAULT NULL,
+    guide_name TEXT DEFAULT '',
+    guide_rating REAL DEFAULT 5.0,
+    comments TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(tourist_id) REFERENCES users(id)
+);
+
+

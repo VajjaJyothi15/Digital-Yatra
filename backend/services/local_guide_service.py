@@ -207,9 +207,14 @@ def get_guide_dashboard_data(user_id):
     total_earnings = sum(b['price'] for b in bookings_list if b['status'] in ['CONFIRMED', 'COMPLETED'])
     pending_count = len([b for b in bookings_list if b['status'] == 'PENDING'])
 
+    # Fetch tourist reviews received by this guide
+    reviews_rows = db.execute("SELECT * FROM tourist_reviews WHERE guide_id = ? ORDER BY created_at DESC", (guide_dict['id'],)).fetchall()
+    reviews_list = [dict(r) for r in reviews_rows]
+
     return {
         "guide": guide_dict,
         "bookings": bookings_list,
+        "reviews": reviews_list,
         "stats": {
             "total_bookings": len(bookings_list),
             "pending": pending_count,

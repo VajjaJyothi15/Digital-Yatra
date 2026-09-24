@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { getAdminDashboardMetrics, getAdminReports, updateReportStatus, getLocalGuides, verifyGuide, revokeGuideByAdmin } from '../api/api';
+import { getAdminDashboardMetrics, getAdminReports, updateReportStatus, getLocalGuides, verifyGuide, revokeGuideByAdmin, getAllReviews } from '../api/api';
 import TrustBadge from '../components/TrustBadge';
-import { FileText, AlertTriangle, CheckCircle, Clock, MapPin, RefreshCw, Layers, ShieldCheck, UserCheck, AlertCircle, Ban } from 'lucide-react';
+import { FileText, AlertTriangle, CheckCircle, Clock, MapPin, RefreshCw, Layers, ShieldCheck, UserCheck, AlertCircle, Ban, Star, MessageSquare } from 'lucide-react';
 import '../styles/dashboard.css';
 
 export default function Admin({ user }) {
   const [metrics, setMetrics] = useState(null);
   const [reports, setReports] = useState([]);
   const [guides, setGuides] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
-  const [activeTab, setActiveTab] = useState('reports'); // reports or guides
+  const [activeTab, setActiveTab] = useState('reports'); // reports, guides, or reviews
   const [toastMessage, setToastMessage] = useState(null);
 
   // Revoke Confirmation Modal State
@@ -24,20 +25,23 @@ export default function Admin({ user }) {
   const fetchAdminData = async () => {
     setLoading(true);
     try {
-      const [mRes, rRes, gRes] = await Promise.all([
+      const [mRes, rRes, gRes, revRes] = await Promise.all([
         getAdminDashboardMetrics(),
         getAdminReports(),
-        getLocalGuides({ city: 'all' })
+        getLocalGuides({ city: 'all' }),
+        getAllReviews()
       ]);
       if (mRes.success) setMetrics(mRes.dashboard);
       if (rRes.success) setReports(rRes.reports);
       if (gRes.success) setGuides(gRes.guides);
+      if (revRes && revRes.success) setReviews(revRes.reviews);
     } catch (err) {
       console.error('Admin data fetch error:', err);
     } finally {
       setLoading(false);
     }
   };
+
 
   const showToast = (msg, type = 'success') => {
     setToastMessage({ msg, type });
@@ -235,7 +239,22 @@ export default function Admin({ user }) {
             >
               🧑‍🏫 Guide Verification & Revoke ({guides.filter(g => !g.verified).length} Pending)
             </button>
+            <button
+              onClick={() => setActiveTab('reviews')}
+              style={{
+                padding: '12px 20px',
+                fontWeight: '700',
+                fontSize: '0.95rem',
+                color: activeTab === 'reviews' ? '#10B981' : 'var(--text-muted)',
+                borderBottom: activeTab === 'reviews' ? '3px solid #10B981' : '3px solid transparent',
+                background: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              ⭐ Tourist Reviews & Feedback Log ({reviews.length})
+            </button>
           </div>
+
 
           {/* Tab 1: Reports Management */}
           {activeTab === 'reports' && (
@@ -436,6 +455,99 @@ export default function Admin({ user }) {
               </table>
             </div>
           )}
+
+          {/* Tab 3: Tourist Reviews & Feedback Log */}
+          {activeTab === 'reviews' && (
+            <div className="glass-card" style={{ padding: '28px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.3rem', display: 'flex', alignItems: 'center', gap: '8px', color: '#1E293B' }}>
+                    <Star className="text-amber-500 fill-amber-400" size={22} /> Tourist Reviews & Feedback Log
+                  </h3>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '4px' }}>
+                    All destination & local guide ratings and trip review comments submitted by tourists across Digital Yatra.
+                  </p>
+                </div>
+                <div style={{ background: '#FEF3C7', color: '#B45309', padding: '6px 14px', borderRadius: '16px', fontWeight: '800', fontSize: '0.85rem' }}>
+                  {reviews.length} Total Reviews
+                </div>
+              </div>
+
+              {reviews.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                  No tourist reviews submitted yet.
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
+                  {reviews.map((rev) => (
+                    <div key={rev.id} style={{
+                      background: '#FFFFFF',
+                      border: '1px solid #E2E8F0',
+                      borderRadius: '16px',
+                      padding: '20px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justify: 'space-between'
+                    }}>
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div style={{
+                              width: '40px',
+                              height: '40px',
+                              borderRadius: '50%',
+                              background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)',
+                              color: '#FFFFFF',
+                              fontWeight: '800',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justify: 'center',
+                              fontSize: '1rem'
+                            }}>
+                              {rev.tourist_name ? rev.tourist_name.charAt(0) : 'T'}
+                            </div>
+                            <div>
+                              <strong style={{ color: '#0F172A', fontSize: '0.95rem' }}>{rev.tourist_name || 'Anonymous Tourist'}</strong>
+                              <div style={{ fontSize: '0.75rem', color: '#64748B' }}>{rev.created_at}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Tags: Destination & Guide */}
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '14px' }}>
+                          {rev.destination_name && (
+                            <span style={{ background: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '700' }}>
+                              📍 {rev.destination_name} (⭐ {rev.destination_rating})
+                            </span>
+                          )}
+                          {rev.guide_name && (
+                            <span style={{ background: '#FEF3C7', color: '#B45309', border: '1px solid #FDE68A', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '700' }}>
+                              🧑‍🏫 Guide: {rev.guide_name} (⭐ {rev.guide_rating})
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Comment Box */}
+                        <div style={{
+                          background: '#F8FAFC',
+                          padding: '12px 16px',
+                          borderRadius: '12px',
+                          fontSize: '0.88rem',
+                          color: '#334155',
+                          lineHeight: '1.5',
+                          borderLeft: '4px solid #F59E0B'
+                        }}>
+                          "{rev.comments}"
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
 
         </div>
       )}

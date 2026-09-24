@@ -16,6 +16,7 @@ import Guide from './pages/Guide';
 import Safety from './pages/Safety';
 import Report from './pages/Report';
 import Admin from './pages/Admin';
+import Reviews from './pages/Reviews';
 import LocationPermissionModal from './components/LocationPermissionModal';
 import { getSavedLiveLocation, saveLiveLocation, getLiveLocation } from './utils/geolocation';
 import './styles/global.css';
@@ -103,6 +104,7 @@ function App() {
             <Route path="/guide" element={<Guide user={user} userLocation={userLocation} onLocationUpdate={handleLocationUpdate} />} />
             <Route path="/safety" element={<Safety user={user} userLocation={userLocation} onLocationUpdate={handleLocationUpdate} />} />
             <Route path="/report" element={<Report user={user} userLocation={userLocation} />} />
+            <Route path="/reviews" element={<Reviews user={user} />} />
             <Route path="/admin" element={<Admin user={user} />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

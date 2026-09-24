@@ -12,6 +12,7 @@ from routes.safety_routes import safety_bp
 from routes.assistant_routes import assistant_bp
 from routes.admin_routes import admin_bp
 from routes.guide_booking_routes import guide_booking_bp
+from routes.review_routes import review_bp
 
 def create_app():
     app = Flask(__name__, static_folder='uploads')
@@ -33,6 +34,7 @@ def create_app():
     app.register_blueprint(assistant_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(guide_booking_bp)
+    app.register_blueprint(review_bp)
 
     @app.route('/api/health', methods=['GET'])
     def health_check():

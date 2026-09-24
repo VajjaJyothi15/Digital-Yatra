@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import DigitalYatraLogo from './DigitalYatraLogo';
-import { Compass, ShieldAlert, FileText, MapPin, UserCheck, CalendarCheck, User, LogOut, LogIn, LayoutDashboard, Landmark, Navigation, Menu, X, Edit3, CheckCircle, Settings, BookmarkCheck, Phone, Mail, Shield } from 'lucide-react';
+import { Compass, ShieldAlert, FileText, MapPin, UserCheck, CalendarCheck, User, LogOut, LogIn, LayoutDashboard, Landmark, Navigation, Menu, X, Edit3, CheckCircle, Settings, BookmarkCheck, Phone, Mail, Shield, Star } from 'lucide-react';
 import { updateUserProfile } from '../api/api';
 
 const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
@@ -268,6 +268,9 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
               <Link to="/report" className={`nav-link ${location.pathname === '/report' ? 'active' : ''}`}>
                 <FileText size={16} /> <span>Report</span>
               </Link>
+              <Link to="/reviews" className={`nav-link ${location.pathname === '/reviews' ? 'active' : ''}`}>
+                <Star size={16} /> <span>Reviews</span>
+              </Link>
             </>
           )}
 
@@ -405,6 +408,9 @@ const Navbar = ({ user, userLocation, onLogout, onUpdateUser }) => {
                   </Link>
                   <Link to="/report" onClick={() => setIsMobileMenuOpen(false)} className={`nav-link ${location.pathname === '/report' ? 'active' : ''}`}>
                     <FileText size={18} /> <span>Report</span>
+                  </Link>
+                  <Link to="/reviews" onClick={() => setIsMobileMenuOpen(false)} className={`nav-link ${location.pathname === '/reviews' ? 'active' : ''}`}>
+                    <Star size={18} /> <span>Reviews</span>
                   </Link>
                 </>
               )}

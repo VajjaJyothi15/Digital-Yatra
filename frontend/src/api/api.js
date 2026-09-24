@@ -146,6 +146,22 @@ export const updateGuideProfile = async (payload) => {
   return response.data;
 };
 
+// Review & Feedback APIs
+export const submitReview = async (payload) => {
+  const response = await api.post('/reviews', payload);
+  return response.data;
+};
+
+export const getAllReviews = async () => {
+  const response = await api.get('/reviews');
+  return response.data;
+};
+
+export const getGuideReviews = async (guideId) => {
+  const response = await api.get(`/guides/${guideId}/reviews`);
+  return response.data;
+};
+
 // Report APIs
 export const submitReportFormData = async (formData) => {
   const response = await axios.post(`${API_BASE_URL}/reports`, formData, {
@@ -263,3 +279,5 @@ export const submitUserFeedback = async (payload) => {
 };
 
 export default api;
+
+
