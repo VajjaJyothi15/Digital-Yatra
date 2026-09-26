@@ -11,6 +11,13 @@ def seed_data_if_empty(conn):
         cursor.execute("SELECT COUNT(*) FROM destinations")
         dest_count = cursor.fetchone()[0]
         if dest_count > 0:
+            cursor.execute("SELECT COUNT(*) FROM destinations WHERE LOWER(city) = 'hyderabad'")
+            if cursor.fetchone()[0] == 0:
+                cursor.execute("""
+                    INSERT INTO destinations (name, city, state, country, description, latitude, longitude, category, entry_fee, rating, trust_status, image, popular)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, ("Charminar & Golconda Fort", "Hyderabad", "Telangana", "India", "Historic city of Nizams famous for Charminar, Golconda Fort, Ramoji Film City, Chowmahalla Palace, and Hyderabadi Biryani.", 17.3850, 78.4867, "Heritage", 25.0, 4.8, "VERIFIED", "https://images.unsplash.com/photo-1605649487212-47bdab064df7?auto=format&fit=crop&w=600&q=80", 1))
+                conn.commit()
             return  # Database already contains destination data
 
         print("[DB] Database destinations table is empty. Auto-seeding initial data...")
@@ -92,6 +99,7 @@ def seed_data_if_empty(conn):
             ("Ajanta & Ellora Caves", "Aurangabad", "Maharashtra", "India", "Rock-cut cave monuments featuring ancient Buddhist, Hindu, and Jain cave carvings and murals.", 20.5519, 75.7033, "Heritage", 40.0, 4.8, "VERIFIED", "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=600&q=80", 1),
             ("Konark Sun Temple", "Konark", "Odisha", "India", "13th-century monumental stone chariot temple dedicated to Sun God Surya with intricate stone wheels.", 19.8876, 86.0945, "Heritage", 40.0, 4.7, "VERIFIED", "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=600&q=80", 1),
             ("Qutub Minar & Red Fort", "Delhi", "Delhi", "India", "UNESCO World Heritage sites depicting Mughal & Delhi Sultanate architectural heights.", 28.5244, 77.1855, "Heritage", 40.0, 4.7, "VERIFIED", "https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=600&q=80", 1),
+            ("Charminar & Golconda Fort", "Hyderabad", "Telangana", "India", "Historic city of Nizams famous for Charminar, Golconda Fort, Ramoji Film City, Chowmahalla Palace, and Hyderabadi Biryani.", 17.3850, 78.4867, "Heritage", 25.0, 4.8, "VERIFIED", "https://images.unsplash.com/photo-1605649487212-47bdab064df7?auto=format&fit=crop&w=600&q=80", 1),
 
             ("Auli Ski Resort & Snow Slopes", "Auli", "Uttarakhand", "India", "Premier Himalayan skiing resort surrounded by Nanda Devi snow peaks and coniferous forests.", 30.5284, 79.5694, "Snow", 0.0, 4.9, "VERIFIED", "https://images.unsplash.com/photo-1548777123-e216912df7d8?auto=format&fit=crop&w=600&q=80", 1),
             ("Gulmarg Gondola & Snow Slopes", "Gulmarg", "Jammu & Kashmir", "India", "World's second-highest cable car offering breathtaking snow panoramas and winter sports.", 34.0484, 74.3805, "Snow", 100.0, 4.9, "VERIFIED", "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=600&q=80", 1),

@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { INDIA_STATES_AND_UTS, getBestTimeAndSeason } from '../data/indiaData';
 import { getDestinations } from '../api/api';
+import SearchSuggestionsDropdown from '../components/SearchSuggestionsDropdown';
+import { useDestinationSuggestions } from '../utils/useDestinationSuggestions';
 
 export default function Discover() {
   const navigate = useNavigate();
@@ -20,6 +22,15 @@ export default function Discover() {
   
   const [apiDestinations, setApiDestinations] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // Autocomplete Suggestions Hook
+  const {
+    suggestions,
+    loading: suggestionsLoading,
+    isOpen: isSuggestionsOpen,
+    setIsOpen: setIsSuggestionsOpen,
+    containerRef: suggestionsRef
+  } = useDestinationSuggestions(searchQuery);
 
   const allRegionNames = Object.keys(INDIA_STATES_AND_UTS);
 
@@ -148,7 +159,14 @@ export default function Discover() {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
+    setIsSuggestionsOpen(false);
     setSearchParams(searchQuery ? { search: searchQuery } : {});
+  };
+
+  const handleSelectSuggestion = (selectedVal) => {
+    setSearchQuery(selectedVal);
+    setIsSuggestionsOpen(false);
+    setSearchParams(selectedVal ? { search: selectedVal } : {});
   };
 
   const statesCount = allRegionNames.filter(n => INDIA_STATES_AND_UTS[n].type === 'State').length;
@@ -159,7 +177,7 @@ export default function Discover() {
       <div className="history-container">
 
         {/* 1. Header Hero Banner */}
-        <div className="history-hero">
+        <div className="history-hero" style={{ overflow: 'visible' }}>
           <div style={{ position: 'relative', zIndex: 10, maxWidth: '720px' }}>
             <div className="history-hero-badge">
               <Landmark style={{ width: '16px', height: '16px', color: '#F59E0B' }} />
@@ -173,18 +191,36 @@ export default function Discover() {
             </p>
 
             {/* Search Input */}
-            <form onSubmit={handleSearchSubmit} className="history-search-form">
+            <form
+              onSubmit={handleSearchSubmit}
+              className="history-search-form"
+              ref={suggestionsRef}
+              style={{ position: 'relative' }}
+            >
               <Search style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', width: '20px', height: '20px', color: '#94A3B8' }} />
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setIsSuggestionsOpen(true);
+                }}
+                onFocus={() => {
+                  if (searchQuery.trim()) setIsSuggestionsOpen(true);
+                }}
                 placeholder="Search state, place, food, temple, or dress (e.g. Tirupati, Araku, Biryani)..."
                 className="history-search-input"
               />
               <button type="submit" className="history-search-btn">
                 Search
               </button>
+              <SearchSuggestionsDropdown
+                suggestions={suggestions}
+                loading={suggestionsLoading}
+                isOpen={isSuggestionsOpen}
+                query={searchQuery}
+                onSelect={handleSelectSuggestion}
+              />
             </form>
           </div>
         </div>

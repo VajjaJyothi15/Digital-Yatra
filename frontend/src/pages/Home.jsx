@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { getDestinations } from '../api/api';
 import TrustBadge from '../components/TrustBadge';
 import Chatbot from '../components/Chatbot';
+import SearchSuggestionsDropdown from '../components/SearchSuggestionsDropdown';
+import { useDestinationSuggestions } from '../utils/useDestinationSuggestions';
 import { Search, Compass, MapPin, ArrowRight, Star } from 'lucide-react';
 import '../styles/home.css';
 
@@ -49,6 +51,15 @@ export default function Home({ user, userLocation, onLocationUpdate }) {
   const [destinations, setDestinations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeDestination, setActiveDestination] = useState('Jaipur');
+
+  // Autocomplete Suggestions Hook
+  const {
+    suggestions,
+    loading: suggestionsLoading,
+    isOpen: isSuggestionsOpen,
+    setIsOpen: setIsSuggestionsOpen,
+    containerRef: suggestionsRef
+  } = useDestinationSuggestions(searchQuery);
 
   // Discovery Section State
   const [selectedDiscoveryCategory, setSelectedDiscoveryCategory] = useState('All');
@@ -107,11 +118,17 @@ export default function Home({ user, userLocation, onLocationUpdate }) {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
+    setIsSuggestionsOpen(false);
     if (searchQuery.trim()) {
       navigate(`/discover?search=${encodeURIComponent(searchQuery)}`);
     } else {
       navigate('/discover');
     }
+  };
+
+  const handleSelectSuggestion = (selectedVal) => {
+    setSearchQuery(selectedVal);
+    setIsSuggestionsOpen(false);
   };
 
   const handleGuideCategoryClick = (category) => {
@@ -130,17 +147,35 @@ export default function Home({ user, userLocation, onLocationUpdate }) {
           </p>
 
           {/* Search Destination */}
-          <form onSubmit={handleSearchSubmit} className="hero-search-box">
-            <Search size={22} color="var(--text-muted)" style={{ marginRight: '12px' }} />
+          <form
+            onSubmit={handleSearchSubmit}
+            className="hero-search-box"
+            ref={suggestionsRef}
+            style={{ position: 'relative' }}
+          >
+            <Search size={22} color="var(--text-muted)" style={{ marginRight: '12px', flexShrink: 0 }} />
             <input
               type="text"
               placeholder="Where are you travelling? (e.g. Jaipur, Tirupati, Goa, Varanasi, Delhi)"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setIsSuggestionsOpen(true);
+              }}
+              onFocus={() => {
+                if (searchQuery.trim()) setIsSuggestionsOpen(true);
+              }}
             />
-            <button type="submit" className="btn btn-primary" style={{ padding: '10px 20px', borderRadius: '14px' }}>
+            <button type="submit" className="btn btn-primary" style={{ padding: '10px 20px', borderRadius: '14px', flexShrink: 0 }}>
               Explore India
             </button>
+            <SearchSuggestionsDropdown
+              suggestions={suggestions}
+              loading={suggestionsLoading}
+              isOpen={isSuggestionsOpen}
+              query={searchQuery}
+              onSelect={handleSelectSuggestion}
+            />
           </form>
 
           {/* 12 Category Discovery Buttons (Wrapped Flex, No H-Scroll) */}
