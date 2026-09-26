@@ -16,26 +16,32 @@ export function useDestinationSuggestions(searchQuery) {
       return;
     }
 
-    setLoading(true);
     setIsOpen(true);
+    setLoading(true);
 
-    // 300ms debounce to avoid spamming requests on every keystroke
-    const timer = setTimeout(async () => {
-      try {
-        const results = await getDestinationSuggestions(trimmed);
-        setSuggestions(results);
-      } catch (err) {
-        console.error('Error in search suggestions hook:', err);
-        setSuggestions([]);
-      } finally {
-        setLoading(false);
-      }
-    }, 300);
+    let isMounted = true;
 
-    return () => clearTimeout(timer);
+    // Fetch suggestions (instant static results + non-blocking API enrichment)
+    getDestinationSuggestions(trimmed)
+      .then((results) => {
+        if (isMounted) {
+          setSuggestions(results);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (isMounted) {
+          console.error('Error fetching suggestions:', err);
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, [searchQuery]);
 
-  // Click outside to close suggestion dropdown
+  // Click outside listener to close suggestion dropdown
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {

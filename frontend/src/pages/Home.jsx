@@ -147,28 +147,25 @@ export default function Home({ user, userLocation, onLocationUpdate }) {
           </p>
 
           {/* Search Destination */}
-          <form
-            onSubmit={handleSearchSubmit}
-            className="hero-search-box"
-            ref={suggestionsRef}
-            style={{ position: 'relative' }}
-          >
-            <Search size={22} color="var(--text-muted)" style={{ marginRight: '12px', flexShrink: 0 }} />
-            <input
-              type="text"
-              placeholder="Where are you travelling? (e.g. Jaipur, Tirupati, Goa, Varanasi, Delhi)"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setIsSuggestionsOpen(true);
-              }}
-              onFocus={() => {
-                if (searchQuery.trim()) setIsSuggestionsOpen(true);
-              }}
-            />
-            <button type="submit" className="btn btn-primary" style={{ padding: '10px 20px', borderRadius: '14px', flexShrink: 0 }}>
-              Explore India
-            </button>
+          <div style={{ position: 'relative', width: '100%', maxWidth: '650px', margin: '0 auto 36px auto' }} ref={suggestionsRef}>
+            <form onSubmit={handleSearchSubmit} className="hero-search-box" style={{ margin: 0 }}>
+              <Search size={22} color="var(--text-muted)" style={{ marginRight: '12px', flexShrink: 0 }} />
+              <input
+                type="text"
+                placeholder="Where are you travelling? (e.g. Jaipur, Tirupati, Goa, Varanasi, Delhi)"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setIsSuggestionsOpen(true);
+                }}
+                onFocus={() => {
+                  if (searchQuery.trim()) setIsSuggestionsOpen(true);
+                }}
+              />
+              <button type="submit" className="btn btn-primary" style={{ padding: '10px 20px', borderRadius: '14px', flexShrink: 0 }}>
+                Explore India
+              </button>
+            </form>
             <SearchSuggestionsDropdown
               suggestions={suggestions}
               loading={suggestionsLoading}
@@ -176,7 +173,7 @@ export default function Home({ user, userLocation, onLocationUpdate }) {
               query={searchQuery}
               onSelect={handleSelectSuggestion}
             />
-          </form>
+          </div>
 
           {/* 12 Category Discovery Buttons (Wrapped Flex, No H-Scroll) */}
           <div style={{

@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Search, Loader2 } from 'lucide-react';
+import { MapPin, Loader2 } from 'lucide-react';
 
 /**
  * Clean, responsive, mobile-friendly destination suggestion dropdown
@@ -22,22 +22,24 @@ export default function SearchSuggestionsDropdown({
       className="search-suggestions-dropdown"
       style={{
         position: 'absolute',
-        top: 'calc(100% + 8px)',
+        top: 'calc(100% + 6px)',
         left: 0,
         right: 0,
+        width: '100%',
         backgroundColor: '#FFFFFF',
         borderRadius: '16px',
-        border: '1px solid #E2E8F0',
-        boxShadow: '0 12px 36px rgba(15, 23, 42, 0.15)',
-        zIndex: 1000,
+        border: '1px solid #CBD5E1',
+        boxShadow: '0 16px 40px rgba(0, 0, 0, 0.25)',
+        zIndex: 999999,
         overflow: 'hidden',
-        maxHeight: '360px',
+        maxHeight: '340px',
         overflowY: 'auto',
         textAlign: 'left',
+        boxSizing: 'border-box',
         ...style
       }}
     >
-      {loading ? (
+      {loading && suggestions.length === 0 ? (
         <div style={{
           padding: '16px 20px',
           display: 'flex',

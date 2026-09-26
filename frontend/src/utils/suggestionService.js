@@ -23,7 +23,6 @@ export async function getDestinationSuggestions(query) {
     if (!suggestionMap.has(key)) {
       suggestionMap.set(key, item);
     } else {
-      // If item already exists, keep the highest score
       const existing = suggestionMap.get(key);
       if (item.score > existing.score) {
         suggestionMap.set(key, { ...existing, ...item });
@@ -31,7 +30,7 @@ export async function getDestinationSuggestions(query) {
     }
   };
 
-  // 1. Search Static Dataset (INDIA_STATES_AND_UTS)
+  // 1. INSTANT SYNCHRONOUS SEARCH in Static Dataset (INDIA_STATES_AND_UTS)
   if (INDIA_STATES_AND_UTS) {
     Object.keys(INDIA_STATES_AND_UTS).forEach((stateName) => {
       const stateObj = INDIA_STATES_AND_UTS[stateName];
@@ -92,7 +91,6 @@ export async function getDestinationSuggestions(query) {
             else if (matchesName || matchesCity) score = 78;
             else if (matchesCat) score = 58;
 
-            // Place Suggestion
             addSuggestion({
               id: `place-${stateName}-${place.name}`,
               title: place.name,
@@ -102,7 +100,6 @@ export async function getDestinationSuggestions(query) {
               score
             });
 
-            // City Suggestion (if city matched)
             if (matchesCity && cityLower !== stateLower && !suggestionMap.has(cityLower)) {
               addSuggestion({
                 id: `city-${place.city}`,
@@ -119,9 +116,14 @@ export async function getDestinationSuggestions(query) {
     });
   }
 
-  // 2. Search Backend API Destinations
+  // 2. Non-blocking API Fetch (max 800ms timeout)
   try {
-    const apiRes = await getDestinations({ search: query });
+    const apiPromise = getDestinations({ search: query });
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('API Timeout')), 800)
+    );
+    
+    const apiRes = await Promise.race([apiPromise, timeoutPromise]);
     const destList = Array.isArray(apiRes) 
       ? apiRes 
       : (apiRes && Array.isArray(apiRes.destinations)) 
@@ -131,7 +133,6 @@ export async function getDestinationSuggestions(query) {
     destList.forEach((dest) => {
       const nameLower = (dest.name || '').toLowerCase();
       const cityLower = (dest.city || '').toLowerCase();
-      const stateLower = (dest.state || '').toLowerCase();
 
       let score = 50;
       if (nameLower === q || cityLower === q) score = 100;
@@ -159,13 +160,11 @@ export async function getDestinationSuggestions(query) {
       }
     });
   } catch (err) {
-    console.warn('Backend API suggestion fetch notice (using static data):', err);
+    // Ignore API delay or offline error (static results take precedence)
   }
 
   // 3. Sort by score descending & limit to 7 results
-  const results = Array.from(suggestionMap.values())
+  return Array.from(suggestionMap.values())
     .sort((a, b) => b.score - a.score)
     .slice(0, 7);
-
-  return results;
 }

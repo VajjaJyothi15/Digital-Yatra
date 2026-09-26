@@ -191,29 +191,26 @@ export default function Discover() {
             </p>
 
             {/* Search Input */}
-            <form
-              onSubmit={handleSearchSubmit}
-              className="history-search-form"
-              ref={suggestionsRef}
-              style={{ position: 'relative' }}
-            >
-              <Search style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', width: '20px', height: '20px', color: '#94A3B8' }} />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setIsSuggestionsOpen(true);
-                }}
-                onFocus={() => {
-                  if (searchQuery.trim()) setIsSuggestionsOpen(true);
-                }}
-                placeholder="Search state, place, food, temple, or dress (e.g. Tirupati, Araku, Biryani)..."
-                className="history-search-input"
-              />
-              <button type="submit" className="history-search-btn">
-                Search
-              </button>
+            <div style={{ position: 'relative', width: '100%', maxWidth: '600px' }} ref={suggestionsRef}>
+              <form onSubmit={handleSearchSubmit} className="history-search-form" style={{ maxWidth: '100%' }}>
+                <Search style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', width: '20px', height: '20px', color: '#94A3B8' }} />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setIsSuggestionsOpen(true);
+                  }}
+                  onFocus={() => {
+                    if (searchQuery.trim()) setIsSuggestionsOpen(true);
+                  }}
+                  placeholder="Search state, place, food, temple, or dress (e.g. Tirupati, Araku, Biryani)..."
+                  className="history-search-input"
+                />
+                <button type="submit" className="history-search-btn">
+                  Search
+                </button>
+              </form>
               <SearchSuggestionsDropdown
                 suggestions={suggestions}
                 loading={suggestionsLoading}
@@ -221,7 +218,7 @@ export default function Discover() {
                 query={searchQuery}
                 onSelect={handleSelectSuggestion}
               />
-            </form>
+            </div>
           </div>
         </div>
 
